@@ -29,29 +29,22 @@ const UNIDADES = [
 
 // Portal Cards - Sócios veem 4, colaboradores/gerentes veem 2
 const PORTAL_CARDS_SOCIO = [
-  { id: "documentos", title: "Documentos", description: "Acesse os documentos da sua unidade", icon: "folder", iconColor: "#003FC3", iconBg: "#E6F0FF", route: "/(tabs)/files" },
-  { id: "metricas", title: "Métricas", description: "Dados de tráfego em tempo real", icon: "bar-chart", iconColor: "#22C55E", iconBg: "#DCFCE7", route: null, action: "metricas" },
-  { id: "arquivos-uteis", title: "Arquivos Úteis", description: "Informações da Espaçolaser", icon: "description", iconColor: "#FF9012", iconBg: "#FFF3E0", route: null },
-  { id: "suporte", title: "Suporte", description: "Tire suas dúvidas", icon: "help-outline", iconColor: "#DF007E", iconBg: "#FCE4EC", route: null, action: "suporte" },
+  { id: "documentos", title: "Documentos", description: "Acesse Notas Fiscais e Relatórios", icon: "folder", iconColor: "#003FC3", iconBg: "#E6F0FF", route: "/(tabs)/files" },
+  { id: "metricas", title: "Métricas", description: "Tráfego Pago em tempo real", icon: "bar-chart", iconColor: "#22C55E", iconBg: "#DCFCE7", route: null, action: "metricas" },
+  { id: "arquivos-uteis", title: "Arquivos Úteis", description: "Vouchers, Artes, Termos e mais", icon: "description", iconColor: "#FF9012", iconBg: "#FFF3E0", route: null, action: "arquivos-uteis" },
+  { id: "suporte", title: "Suporte", description: "Vamos resolver seu problema", icon: "help-outline", iconColor: "#DF007E", iconBg: "#FCE4EC", route: null, action: "suporte" },
 ];
 
 const PORTAL_CARDS_COLABORADOR = [
-  { id: "documentos", title: "Documentos", description: "Acesse os documentos da sua unidade", icon: "folder", iconColor: "#003FC3", iconBg: "#E6F0FF", route: "/(tabs)/files" },
-  { id: "suporte", title: "Suporte", description: "Tire suas dúvidas", icon: "help-outline", iconColor: "#DF007E", iconBg: "#FCE4EC", route: null, action: "suporte" },
+  { id: "documentos", title: "Documentos", description: "Acesse Notas Fiscais e Relatórios", icon: "folder", iconColor: "#003FC3", iconBg: "#E6F0FF", route: "/(tabs)/files" },
+  { id: "suporte", title: "Suporte", description: "Vamos resolver seu problema", icon: "help-outline", iconColor: "#DF007E", iconBg: "#FCE4EC", route: null, action: "suporte" },
 ];
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { user, isSocio } = useAppAuth();
-  const { posts, addPost, likePost, addComment, allUsers } = useData();
-
-  // Gerar aniversariantes de exemplo
-  const birthdays = [
-    { name: "Maria Silva", date: "08/01", avatarUrl: null },
-    { name: "João Santos", date: "09/01", avatarUrl: null },
-    { name: "Ana Costa", date: "10/01", avatarUrl: null },
-  ];
+  const { posts, addPost, likePost, addComment, getComments, deleteComment, allUsers, birthdays, sendBirthdayWish } = useData();
 
   const [refreshing, setRefreshing] = useState(false);
   const [selectedUnidade, setSelectedUnidade] = useState("geral");
@@ -77,10 +70,11 @@ export default function HomeScreen() {
       // Abrir WhatsApp
       Linking.openURL("https://wa.me/5587996466975");
     } else if (card.action === "metricas") {
-      // TODO: Abrir métricas do Google Sheets
-      if (Platform.OS === "web") {
-        alert("Métricas em tempo real - Em breve!");
-      }
+      // Navegar para tela de métricas
+      router.push("/(tabs)/metricas" as any);
+    } else if (card.action === "arquivos-uteis") {
+      // Abrir pasta do Drive com Vouchers, Artes, Termos
+      Linking.openURL("https://drive.google.com/drive/folders/1WJ2KcWVMnAZZxkrUGtNV33jez8_YT2uR?usp=sharing");
     }
   };
 
@@ -189,34 +183,50 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          {/* Aniversariantes */}
+          {/* Aniversários do Mês */}
           {birthdays.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Aniversariantes</Text>
+              <Text style={styles.sectionTitle}>Aniversários do mês</Text>
               <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: 16 }}
               >
-                {birthdays.map((person: any, index: number) => (
-                  <View key={index} style={styles.birthdayItem}>
+                {birthdays.map((person: any) => (
+                  <View key={person.id} style={styles.birthdayItem}>
                     <View style={[
                       styles.birthdayAvatar,
-                      index === 0 && styles.birthdayAvatarHighlight
+                      person.isTodayBirthday && styles.birthdayAvatarHighlight
                     ]}>
                       {person.avatarUrl ? (
                         <Image source={{ uri: person.avatarUrl }} style={styles.birthdayAvatarImage} />
                       ) : (
                         <Text style={[
                           styles.birthdayAvatarText,
-                          index === 0 && styles.birthdayAvatarTextHighlight
+                          person.isTodayBirthday && styles.birthdayAvatarTextHighlight
                         ]}>
                           {person.name.charAt(0)}
                         </Text>
                       )}
+                      {person.isTodayBirthday && (
+                        <View style={styles.birthdayBadge}>
+                          <Text style={styles.birthdayBadgeText}>🎂</Text>
+                        </View>
+                      )}
                     </View>
                     <Text style={styles.birthdayName} numberOfLines={1}>{person.name.split(" ")[0]}</Text>
-                    <Text style={styles.birthdayDate}>{person.date}</Text>
+                    <Text style={styles.birthdayDate}>
+                      {person.birthDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
+                    </Text>
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.birthdayWishButton,
+                        pressed && styles.birthdayWishButtonPressed,
+                      ]}
+                      onPress={() => sendBirthdayWish(person.id)}
+                    >
+                      <Text style={styles.birthdayWishText}>Parabéns 🎉</Text>
+                    </Pressable>
                   </View>
                 ))}
               </ScrollView>
@@ -403,23 +413,56 @@ export default function HomeScreen() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Pressable onPress={() => setCommentModalPost(null)}>
-                <Text style={styles.modalCancelText}>Cancelar</Text>
+                <Text style={styles.modalCancelText}>Fechar</Text>
               </Pressable>
-              <Text style={styles.modalTitle}>Comentar</Text>
+              <Text style={styles.modalTitle}>Comentários</Text>
               <Pressable onPress={handleAddComment}>
                 <Text style={styles.modalSubmitText}>Enviar</Text>
               </Pressable>
             </View>
 
-            <TextInput
-              style={styles.commentInput}
-              placeholder="Escreva seu comentário..."
-              placeholderTextColor="#9CA3AF"
-              multiline
-              value={newComment}
-              onChangeText={setNewComment}
-              autoFocus
-            />
+            {/* Lista de comentários existentes */}
+            <ScrollView style={styles.commentsList}>
+              {commentModalPost && getComments(commentModalPost.id).map((comment: any) => (
+                <View key={comment.id} style={styles.commentItem}>
+                  <ProfilePhoto
+                    uri={comment.authorAvatar}
+                    name={comment.authorName}
+                    size={32}
+                  />
+                  <View style={styles.commentContent}>
+                    <Text style={styles.commentAuthor}>{comment.authorName}</Text>
+                    <Text style={styles.commentText}>{comment.content}</Text>
+                    <Text style={styles.commentTime}>
+                      {new Date(comment.createdAt).toLocaleDateString("pt-BR")}
+                    </Text>
+                  </View>
+                  {comment.authorId === user?.id && (
+                    <Pressable
+                      style={styles.deleteCommentButton}
+                      onPress={() => deleteComment(comment.id)}
+                    >
+                      <MaterialIcons name="delete-outline" size={18} color="#EF4444" />
+                    </Pressable>
+                  )}
+                </View>
+              ))}
+              {commentModalPost && getComments(commentModalPost.id).length === 0 && (
+                <Text style={styles.noCommentsText}>Nenhum comentário ainda. Seja o primeiro!</Text>
+              )}
+            </ScrollView>
+
+            {/* Input de novo comentário */}
+            <View style={styles.commentInputContainer}>
+              <TextInput
+                style={styles.commentInput}
+                placeholder="Escreva seu comentário..."
+                placeholderTextColor="#9CA3AF"
+                multiline
+                value={newComment}
+                onChangeText={setNewComment}
+              />
+            </View>
           </View>
         </View>
       </Modal>
@@ -574,6 +617,32 @@ const styles = StyleSheet.create({
   birthdayDate: {
     fontSize: 12,
     color: "#6B7280",
+  },
+  birthdayBadge: {
+    position: "absolute",
+    bottom: -2,
+    right: -2,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    padding: 2,
+  },
+  birthdayBadgeText: {
+    fontSize: 14,
+  },
+  birthdayWishButton: {
+    marginTop: 6,
+    backgroundColor: "#003FC3",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  birthdayWishButtonPressed: {
+    opacity: 0.8,
+  },
+  birthdayWishText: {
+    fontSize: 10,
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
   unidadeItem: {
     alignItems: "center",
@@ -791,7 +860,53 @@ const styles = StyleSheet.create({
     padding: 16,
     fontSize: 14,
     color: "#111827",
-    minHeight: 120,
+    minHeight: 60,
     textAlignVertical: "top",
+    flex: 1,
+  },
+  commentsList: {
+    maxHeight: 300,
+    paddingHorizontal: 16,
+  },
+  commentItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+  },
+  commentContent: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  commentAuthor: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  commentText: {
+    fontSize: 13,
+    color: "#374151",
+    marginTop: 2,
+  },
+  commentTime: {
+    fontSize: 11,
+    color: "#9CA3AF",
+    marginTop: 4,
+  },
+  deleteCommentButton: {
+    padding: 4,
+  },
+  noCommentsText: {
+    textAlign: "center",
+    color: "#9CA3AF",
+    paddingVertical: 24,
+    fontSize: 14,
+  },
+  commentInputContainer: {
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
 });

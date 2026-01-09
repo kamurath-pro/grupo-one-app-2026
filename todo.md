@@ -87,3 +87,41 @@
 - [x] Logo Grupo ONE branca no header azul das telas de login e cadastro
 - [x] Rodapé "Desenvolvido por" + logo TráfegON azul
 - [x] Copiar logos corretas para assets
+
+## Atualização v4.0 - Melhorias Completas
+
+### PORTAL
+- [x] Documentos: label "Acesse Notas Fiscais e Relatórios"
+- [x] Documentos: flow Portal > Documentos > Selecionar Unidade > Relatórios Mensais | Notas Fiscais
+- [x] Documentos: remover "Fonte de Dados"
+- [x] Métricas: label "Tráfego Pago em tempo real"
+- [x] Métricas: tela criada com layout igual ao app de referência
+- [ ] Métricas: integração com Google Sheets (pendente API)
+- [x] Arquivos Úteis: label "Vouchers, Artes, Termos e mais"
+- [x] Arquivos Úteis: redirecionar para pasta do Drive
+- [x] Suporte: label "Vamos resolver seu problema"
+
+### ANIVERSARIANTES
+- [x] Label "Aniversários do mês"
+- [x] Exibir aniversariantes durante o mês
+- [x] Destaque visual no dia do aniversário (badge de bolo + cor azul)
+- [ ] Notificação interna (sininho) no dia (pendente integração)
+- [ ] Push notification no dia do aniversário (pendente integração)
+- [x] Botão funcional para dar parabéns com 1 clique
+
+### TIMES
+- [x] Posição: abaixo de Aniversários e acima das unidades
+- [x] Tab Geral: postagens de todas as unidades
+- [x] Tab Unidade: apenas postagens da unidade do usuário
+- [x] Membros: detecção automática da unidade ao postar
+- [x] Sócios: podem selecionar unidade ao postar
+- [x] Conteúdo: apenas texto OU texto + 1 imagem
+- [x] Imagem: proporção 4:5 (hint na tela de criar)
+- [x] Proibir vídeos e arquivos (removidos da tela de criar)
+
+### MURAL OFICIAL
+- [x] Likes: contador visível e em tempo real
+- [x] Comentários: exibir nome e foto do autor
+- [x] Comentários: apenas o autor pode excluir
+- [x] Comentários: permanecem até exclusão
+- [x] Corrigir funcionamento atual dos comentários

@@ -71,16 +71,6 @@ export default function FilesScreen() {
             description: "Notas fiscais e documentos fiscais",
             url: access.notasFiscais,
           },
-          {
-            id: `${access.unitName}-dados`,
-            name: "Fonte de Dados",
-            type: "link" as const,
-            icon: "link",
-            iconColor: "#DF007E",
-            iconBg: "#FCE4EC",
-            description: "Planilha de dados em tempo real",
-            url: access.fonteDados,
-          },
         ],
       }));
     }

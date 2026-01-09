@@ -23,6 +23,7 @@ export interface Comment {
   postId: number;
   authorId: number;
   authorName: string;
+  authorAvatar?: string;
   content: string;
   createdAt: Date;
 }
@@ -70,16 +71,29 @@ export interface FileItem {
   driveUrl?: string;
 }
 
+export interface Birthday {
+  id: number;
+  userId: number;
+  name: string;
+  unitName: string;
+  avatarUrl?: string;
+  birthDate: Date; // dia e mês do aniversário
+  isTodayBirthday: boolean;
+}
+
 interface DataContextType {
   posts: Post[];
   conversations: Conversation[];
   recognitions: Recognition[];
   files: FileItem[];
+  birthdays: Birthday[];
   allUsers: { id: number; name: string; unitName: string; appRole: string }[];
   addPost: (content: string, imageUrl?: string) => void;
   likePost: (postId: number) => void;
+  sendBirthdayWish: (birthdayId: number) => void;
   addComment: (postId: number, content: string) => void;
   getComments: (postId: number) => Comment[];
+  deleteComment: (commentId: number) => void;
   sendMessage: (conversationId: number, content: string) => void;
   getMessages: (conversationId: number) => Message[];
   startConversation: (participantIds: number[]) => number;
@@ -259,6 +273,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       postId,
       authorId: user.id,
       authorName: user.name,
+      authorAvatar: user.photoUrl,
       content,
       createdAt: new Date(),
     };
@@ -279,6 +294,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const getComments = (postId: number) => {
     return comments.filter((c) => c.postId === postId);
+  };
+
+  const deleteComment = (commentId: number) => {
+    if (!user) return;
+    
+    const comment = comments.find((c) => c.id === commentId);
+    if (!comment) return;
+    
+    // Apenas o autor pode excluir o comentário
+    if (comment.authorId !== user.id) return;
+    
+    const updatedComments = comments.filter((c) => c.id !== commentId);
+    setComments(updatedComments);
+    saveData(COMMENTS_KEY, updatedComments);
+    
+    // Atualizar contagem de comentários no post
+    const updatedPosts = posts.map((post) => {
+      if (post.id === comment.postId) {
+        return { ...post, comments: Math.max(0, post.comments - 1) };
+      }
+      return post;
+    });
+    setPosts(updatedPosts);
+    saveData(POSTS_KEY, updatedPosts);
   };
 
   const sendMessage = (conversationId: number, content: string) => {
@@ -387,6 +426,46 @@ export function DataProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // Gerar aniversários do mês atual
+  const getBirthdaysThisMonth = (): Birthday[] => {
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentDay = today.getDate();
+
+    // Dados de exemplo de aniversários
+    const birthdayData = [
+      { userId: 1, name: "Priscila", unitName: "Araripina", day: 8, month: 0 },
+      { userId: 3, name: "Natália", unitName: "Serra Talhada", day: 9, month: 0 },
+      { userId: 5, name: "Maria", unitName: "Araripina", day: 10, month: 0 },
+      { userId: 6, name: "Alice", unitName: "Garanhuns", day: 15, month: 0 },
+      { userId: 8, name: "Sabrina", unitName: "Cajazeiras", day: 20, month: 0 },
+      { userId: 9, name: "Carol", unitName: "Livramento", day: 25, month: 0 },
+      { userId: 10, name: "Ana Laura", unitName: "Muriaé", day: 28, month: 0 },
+    ];
+
+    return birthdayData
+      .filter((b) => b.month === currentMonth)
+      .sort((a, b) => a.day - b.day)
+      .map((b, index) => ({
+        id: index + 1,
+        userId: b.userId,
+        name: b.name,
+        unitName: b.unitName,
+        birthDate: new Date(today.getFullYear(), b.month, b.day),
+        isTodayBirthday: b.day === currentDay,
+      }));
+  };
+
+  const birthdays = getBirthdaysThisMonth();
+
+  const sendBirthdayWish = (birthdayId: number) => {
+    const birthday = birthdays.find((b) => b.id === birthdayId);
+    if (birthday && user) {
+      // Criar um reconhecimento de parabéns
+      sendRecognition(birthday.userId, "parabens", "Feliz aniversário! 🎉");
+    }
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -394,11 +473,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         conversations,
         recognitions,
         files: DEMO_FILES,
+        birthdays,
         allUsers: ALL_USERS,
         addPost,
         likePost,
+        sendBirthdayWish,
         addComment,
         getComments,
+        deleteComment,
         sendMessage,
         getMessages,
         startConversation,

@@ -24,10 +24,13 @@ const UNIDADES = [
 export default function CreatePostScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user } = useAppAuth();
+  const { user, isSocio } = useAppAuth();
   const [content, setContent] = useState("");
-  const [selectedUnidade, setSelectedUnidade] = useState("Geral");
+  // Membros não escolhem unidade (detecta automaticamente), sócios podem escolher
+  const defaultUnidade = user?.unitNames?.[0] || "Geral";
+  const [selectedUnidade, setSelectedUnidade] = useState(defaultUnidade);
   const [showUnidadeSelector, setShowUnidadeSelector] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const handlePost = () => {
     if (!content.trim()) {
@@ -81,14 +84,22 @@ export default function CreatePostScreen() {
           </View>
           <View style={styles.userDetails}>
             <Text style={styles.userName}>{user?.name || "Usuário"}</Text>
-            <Pressable
-              style={styles.unidadeSelector}
-              onPress={() => setShowUnidadeSelector(!showUnidadeSelector)}
-            >
-              <MaterialIcons name="location-on" size={14} color="#003FC3" />
-              <Text style={styles.unidadeText}>{selectedUnidade}</Text>
-              <MaterialIcons name="keyboard-arrow-down" size={16} color="#003FC3" />
-            </Pressable>
+            {/* Sócios podem escolher unidade, membros veem apenas sua unidade */}
+            {isSocio ? (
+              <Pressable
+                style={styles.unidadeSelector}
+                onPress={() => setShowUnidadeSelector(!showUnidadeSelector)}
+              >
+                <MaterialIcons name="location-on" size={14} color="#003FC3" />
+                <Text style={styles.unidadeText}>{selectedUnidade}</Text>
+                <MaterialIcons name="keyboard-arrow-down" size={16} color="#003FC3" />
+              </Pressable>
+            ) : (
+              <View style={styles.unidadeFixed}>
+                <MaterialIcons name="location-on" size={14} color="#6B7280" />
+                <Text style={styles.unidadeTextFixed}>{defaultUnidade}</Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -135,20 +146,13 @@ export default function CreatePostScreen() {
         />
       </ScrollView>
 
-      {/* Bottom actions */}
+      {/* Bottom actions - apenas foto permitida (sem vídeo/arquivo) */}
       <View style={[styles.bottomActions, { paddingBottom: Platform.OS === "web" ? 12 : insets.bottom + 12 }]}>
         <Pressable style={styles.actionButton}>
           <MaterialIcons name="image" size={24} color="#003FC3" />
-          <Text style={styles.actionText}>Foto</Text>
+          <Text style={styles.actionText}>Adicionar Foto</Text>
         </Pressable>
-        <Pressable style={styles.actionButton}>
-          <MaterialIcons name="videocam" size={24} color="#003FC3" />
-          <Text style={styles.actionText}>Vídeo</Text>
-        </Pressable>
-        <Pressable style={styles.actionButton}>
-          <MaterialIcons name="attach-file" size={24} color="#003FC3" />
-          <Text style={styles.actionText}>Arquivo</Text>
-        </Pressable>
+        <Text style={styles.imageHint}>Proporção 4:5 recomendada</Text>
       </View>
     </View>
   );
@@ -293,5 +297,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#003FC3",
     fontWeight: "500",
+  },
+  unidadeFixed: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+    gap: 4,
+  },
+  unidadeTextFixed: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  imageHint: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginLeft: "auto",
+    alignSelf: "center",
   },
 });
