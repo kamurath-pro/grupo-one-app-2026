@@ -195,19 +195,24 @@ export default function MetricasScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#003FC3"]} />
         }
       >
-        {/* Header do Painel */}
-        <View style={styles.panelHeader}>
-          <View style={styles.headerBadge}>
-            <Text style={styles.headerBadgeText}>PAINEL EXECUTIVO</Text>
+        {/* Saudação igual à Home */}
+        <View style={styles.greetingContainer}>
+          <View style={styles.greetingTextContainer}>
+            <Text style={styles.greetingText}>Olá, {user?.name}!</Text>
+            <Pressable style={styles.unitBadge} onPress={handleChangeUnit}>
+              <Text style={styles.unitBadgeText}>{selectedUnit}</Text>
+              {unitAccess.length > 1 && (
+                <MaterialIcons name="keyboard-arrow-down" size={14} color="#003FC3" />
+              )}
+            </Pressable>
           </View>
-          <Text style={styles.welcomeText}>Olá, {user?.name}! 👋</Text>
-          <Pressable style={styles.unitIndicator} onPress={handleChangeUnit}>
-            <MaterialIcons name="location-on" size={16} color="#FFFFFF" />
-            <Text style={styles.unitIndicatorText}>Espaçolaser {selectedUnit}</Text>
-            {unitAccess.length > 1 && (
-              <MaterialIcons name="keyboard-arrow-down" size={16} color="#FFFFFF" />
-            )}
-          </Pressable>
+        </View>
+
+        {/* Banner de Performance */}
+        <View style={styles.performanceBanner}>
+          <Text style={styles.performanceBannerLabel}>Performance</Text>
+          <Text style={styles.performanceBannerTitle}>Tráfego Pago em Tempo Real</Text>
+          <Text style={styles.performanceBannerSubtitle}>Dados atualizados automaticamente do Google Sheets</Text>
         </View>
 
         {/* Performance do Tráfego Pago */}
@@ -535,5 +540,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#6B7280",
     lineHeight: 18,
+  },
+  greetingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+  },
+  greetingTextContainer: {
+    flex: 1,
+  },
+  greetingText: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  unitBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+  },
+  unitBadgeText: {
+    fontSize: 14,
+    color: "#003FC3",
+    fontWeight: "500",
+  },
+  performanceBanner: {
+    backgroundColor: "#003FC3",
+    marginHorizontal: 20,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+  },
+  performanceBannerLabel: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.8)",
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  performanceBannerTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginBottom: 4,
+  },
+  performanceBannerSubtitle: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.8)",
   },
 });

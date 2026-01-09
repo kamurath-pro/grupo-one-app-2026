@@ -10,10 +10,20 @@ export interface MetricasData {
 }
 
 // Mapeamento das planilhas por unidade
+// IDs extraídos do documento de configurações do Google Docs
 const SHEETS_CONFIG: Record<string, string> = {
   araripina: "1XxorSEspVwY-VAa8XeR2YleixguDwGwVaumu3rQS9OI",
+  serra: "1xkhRGEhHMyntv2DcGtZPovX3vAzKglqEnblRAFPxx10",
   vitoria: "1bZYM4-Iw-7TWMtNcgX1apj5jrSpR1pBPXKAVxciSOWo",
-  // Adicionar outras unidades conforme disponível
+  garanhuns: "", // Aguardando link da planilha
+  cajazeiras: "", // Aguardando link da planilha
+  livramento: "", // Aguardando link da planilha
+  muriae: "", // Aguardando link da planilha
+  vilhena: "", // Aguardando link da planilha
+  corumba: "", // Aguardando link da planilha
+  fortaleza: "", // Aguardando link da planilha
+  macae_plaza: "", // Aguardando link da planilha
+  macae_centro: "", // Aguardando link da planilha
 };
 
 // Função para buscar dados da planilha usando a API pública do Google Sheets

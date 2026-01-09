@@ -3,7 +3,10 @@ import { useState } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import * as ImagePicker from "expo-image-picker";
+import { Image } from "expo-image";
 import { useAppAuth } from "@/lib/auth-context";
+import { useData } from "@/lib/data-context";
 
 const UNIDADES = [
   "Geral",
@@ -31,6 +34,36 @@ export default function CreatePostScreen() {
   const [selectedUnidade, setSelectedUnidade] = useState(defaultUnidade);
   const [showUnidadeSelector, setShowUnidadeSelector] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { addPost } = useData();
+
+  const pickImage = async () => {
+    // Solicitar permissão
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      if (Platform.OS === "web") {
+        alert("Precisamos de permissão para acessar suas fotos");
+      } else {
+        Alert.alert("Permissão necessária", "Precisamos de permissão para acessar suas fotos");
+      }
+      return;
+    }
+
+    // Abrir galeria com proporção 4:5
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [4, 5],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      setSelectedImage(result.assets[0].uri);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+  };
 
   const handlePost = () => {
     if (!content.trim()) {
@@ -42,8 +75,8 @@ export default function CreatePostScreen() {
       return;
     }
 
-    // TODO: Implement actual post creation
-    console.log("Creating post:", { content, unidade: selectedUnidade });
+    // Criar o post com a imagem (se houver)
+    addPost(content.trim(), selectedImage || undefined);
     
     if (Platform.OS === "web") {
       alert("Post criado com sucesso!");
@@ -52,6 +85,7 @@ export default function CreatePostScreen() {
     }
     
     setContent("");
+    setSelectedImage(null);
     router.back();
   };
 
@@ -144,13 +178,29 @@ export default function CreatePostScreen() {
           onChangeText={setContent}
           autoFocus
         />
+
+        {/* Preview da imagem selecionada */}
+        {selectedImage && (
+          <View style={styles.imagePreviewContainer}>
+            <Image
+              source={{ uri: selectedImage }}
+              style={styles.imagePreview}
+              contentFit="cover"
+            />
+            <Pressable style={styles.removeImageButton} onPress={removeImage}>
+              <MaterialIcons name="close" size={20} color="#FFFFFF" />
+            </Pressable>
+          </View>
+        )}
       </ScrollView>
 
       {/* Bottom actions - apenas foto permitida (sem vídeo/arquivo) */}
       <View style={[styles.bottomActions, { paddingBottom: Platform.OS === "web" ? 12 : insets.bottom + 12 }]}>
-        <Pressable style={styles.actionButton}>
+        <Pressable style={styles.actionButton} onPress={pickImage}>
           <MaterialIcons name="image" size={24} color="#003FC3" />
-          <Text style={styles.actionText}>Adicionar Foto</Text>
+          <Text style={styles.actionText}>
+            {selectedImage ? "Trocar Foto" : "Adicionar Foto"}
+          </Text>
         </Pressable>
         <Text style={styles.imageHint}>Proporção 4:5 recomendada</Text>
       </View>
@@ -313,5 +363,27 @@ const styles = StyleSheet.create({
     color: "#9CA3AF",
     marginLeft: "auto",
     alignSelf: "center",
+  },
+  imagePreviewContainer: {
+    marginTop: 16,
+    borderRadius: 12,
+    overflow: "hidden",
+    position: "relative",
+  },
+  imagePreview: {
+    width: "100%",
+    aspectRatio: 4 / 5,
+    borderRadius: 12,
+  },
+  removeImageButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    borderRadius: 16,
+    width: 32,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

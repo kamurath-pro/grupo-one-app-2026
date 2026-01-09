@@ -155,3 +155,40 @@
 - [x] Perfil > Configurações: remover "Privacidade"
 - [x] Perfil > Suporte: remover "Central de ajuda"
 - [x] Perfil > Suporte: remover "Termos de uso"
+
+## Atualização v4.4 - Novas Funcionalidades
+### 1. Mural - Ver Comentários
+- [x] Adicionar botão "Ver comentários" nas publicações
+- [x] Expandir campo da publicação para exibir comentários inline
+
+### 2. Suporte - Ícone WhatsApp
+- [x] Adicionar ícone de chat/atendimento no card Suporte (verde)
+
+### 3. Chat - Apagar Mensagens
+- [x] Implementar opção de apagar mensagem enviada
+- [x] Implementar opção de apagar conversa inteira
+
+### 4. Métricas - Redesign
+- [x] Atualizar layout igual ao início da aba Home
+- [x] Padronizar design do painel executivo com header azul
+
+### 5. Mural - Upload de Imagens
+- [x] Implementar seleção de imagem da galeria (expo-image-picker)
+- [x] Suporte para proporção 4:5
+- [x] Preview da imagem antes de publicar
+
+### 6. Métricas - Integrar Unidades Faltantes
+- [x] Estrutura preparada para Garanhuns (aguardando link da planilha)
+- [x] Estrutura preparada para Cajazeiras (aguardando link da planilha)
+- [x] Todas as 12 unidades mapeadas no serviço
+
+### 7. Aniversários - Animação de Festa
+- [x] Botão "Parabéns" aparece apenas para aniversariante do dia
+- [x] Feedback visual ao dar parabéns
+
+### 8. Aniversários - Integração Monday.com
+- [x] Conectar com Monday.com via MCP
+- [x] Extrair dados do quadro Aniversariantes (Nome, Unidade, Data, Foto)
+- [x] Identificar unidades pelos prefixos (ARA, ST, GUS, CZ, VSA, LIV, MUR, VIL, COR, FOR, MACS, MACE)
+- [x] Serviço monday-service.ts criado com mapeamento completo
+- [ ] Atualização automática diária (requer endpoint no servidor)

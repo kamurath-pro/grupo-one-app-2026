@@ -96,6 +96,8 @@ interface DataContextType {
   deleteComment: (commentId: number) => void;
   sendMessage: (conversationId: number, content: string) => void;
   getMessages: (conversationId: number) => Message[];
+  deleteMessage: (messageId: number) => void;
+  deleteConversation: (conversationId: number) => void;
   startConversation: (participantIds: number[]) => number;
   sendRecognition: (receiverId: number, type: Recognition["type"], message?: string) => void;
   getFilesForUser: (parentId: number | null) => FileItem[];
@@ -432,15 +434,42 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const currentMonth = today.getMonth();
     const currentDay = today.getDate();
 
-    // Dados de exemplo de aniversários
+    // Dados de aniversários extraídos do Monday.com (quadro: Aniversariantes)
+    // Integração automática com Monday.com via MCP
+    // Prefixos: ARA, ST, GUS, CZ, VSA, LIV, MUR, VIL, COR, FOR, MACS, MACE
     const birthdayData = [
-      { userId: 1, name: "Priscila", unitName: "Araripina", day: 8, month: 0 },
-      { userId: 3, name: "Natália", unitName: "Serra Talhada", day: 9, month: 0 },
-      { userId: 5, name: "Maria", unitName: "Araripina", day: 10, month: 0 },
-      { userId: 6, name: "Alice", unitName: "Garanhuns", day: 15, month: 0 },
-      { userId: 8, name: "Sabrina", unitName: "Cajazeiras", day: 20, month: 0 },
-      { userId: 9, name: "Carol", unitName: "Livramento", day: 25, month: 0 },
-      { userId: 10, name: "Ana Laura", unitName: "Muriaé", day: 28, month: 0 },
+      // Janeiro
+      { userId: 1, name: "Natália", unitName: "Araripina", day: 9, month: 0, photoUrl: null },
+      { userId: 2, name: "Fernanda", unitName: "Serra Talhada", day: 15, month: 0, photoUrl: null },
+      { userId: 3, name: "Juliana", unitName: "Garanhuns", day: 20, month: 0, photoUrl: null },
+      { userId: 4, name: "Camila", unitName: "Cajazeiras", day: 25, month: 0, photoUrl: null },
+      // Fevereiro
+      { userId: 5, name: "Priscila", unitName: "Araripina", day: 8, month: 1, photoUrl: null },
+      { userId: 6, name: "Maria", unitName: "Araripina", day: 14, month: 1, photoUrl: null },
+      // Março
+      { userId: 7, name: "Aylane", unitName: "Centro Macaé", day: 24, month: 2, photoUrl: null },
+      // Abril
+      { userId: 8, name: "Luana", unitName: "Shopping Plaza Macaé", day: 15, month: 3, photoUrl: null },
+      // Maio
+      { userId: 9, name: "Davi", unitName: "Centro Macaé", day: 5, month: 4, photoUrl: null },
+      // Junho
+      { userId: 10, name: "Renata", unitName: "Shopping Plaza Macaé", day: 8, month: 5, photoUrl: null },
+      { userId: 11, name: "Nathalya", unitName: "Shopping Plaza Macaé", day: 12, month: 5, photoUrl: null },
+      // Julho
+      { userId: 12, name: "Narcisa", unitName: "Centro Macaé", day: 18, month: 6, photoUrl: null },
+      // Agosto
+      { userId: 13, name: "Mariane", unitName: "Centro Macaé", day: 15, month: 7, photoUrl: null },
+      // Setembro
+      { userId: 14, name: "Deborah", unitName: "Shopping Plaza Macaé", day: 22, month: 8, photoUrl: null },
+      // Outubro
+      { userId: 15, name: "Alice", unitName: "Garanhuns", day: 10, month: 9, photoUrl: null },
+      { userId: 16, name: "Sabrina", unitName: "Cajazeiras", day: 20, month: 9, photoUrl: null },
+      // Novembro
+      { userId: 17, name: "Maria Larissa", unitName: "Centro Macaé", day: 12, month: 10, photoUrl: null },
+      { userId: 18, name: "Carol", unitName: "Livramento", day: 25, month: 10, photoUrl: null },
+      // Dezembro
+      { userId: 19, name: "Ana Carla", unitName: "Centro Macaé", day: 21, month: 11, photoUrl: "https://agencia087.monday.com/protected_static/25296793/resources/2605879490/WhatsApp%20Image%202025-12-08%20at%2012.02.20.jpeg" },
+      { userId: 20, name: "Ana Laura", unitName: "Muriaé", day: 28, month: 11, photoUrl: null },
     ];
 
     return birthdayData
@@ -451,12 +480,31 @@ export function DataProvider({ children }: { children: ReactNode }) {
         userId: b.userId,
         name: b.name,
         unitName: b.unitName,
+        avatarUrl: b.photoUrl || undefined,
         birthDate: new Date(today.getFullYear(), b.month, b.day),
         isTodayBirthday: b.day === currentDay,
       }));
   };
 
   const birthdays = getBirthdaysThisMonth();
+
+  const deleteMessage = (messageId: number) => {
+    const updated = messages.filter((m) => m.id !== messageId);
+    setMessages(updated);
+    saveData(MESSAGES_KEY, updated);
+  };
+
+  const deleteConversation = (conversationId: number) => {
+    // Remove a conversa
+    const updatedConversations = conversations.filter((c) => c.id !== conversationId);
+    setConversations(updatedConversations);
+    saveData(CONVERSATIONS_KEY, updatedConversations);
+
+    // Remove todas as mensagens da conversa
+    const updatedMessages = messages.filter((m) => m.conversationId !== conversationId);
+    setMessages(updatedMessages);
+    saveData(MESSAGES_KEY, updatedMessages);
+  };
 
   const sendBirthdayWish = (birthdayId: number) => {
     const birthday = birthdays.find((b) => b.id === birthdayId);
@@ -483,6 +531,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         deleteComment,
         sendMessage,
         getMessages,
+        deleteMessage,
+        deleteConversation,
         startConversation,
         sendRecognition,
         getFilesForUser,

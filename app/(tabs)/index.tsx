@@ -33,12 +33,12 @@ const PORTAL_CARDS_SOCIO = [
   { id: "documentos", title: "Documentos", description: "Acesse Notas Fiscais e Relatórios", icon: "folder", iconColor: "#003FC3", iconBg: "#E6F0FF", route: "/(tabs)/files" },
   { id: "metricas", title: "Métricas", description: "Tráfego Pago em tempo real", icon: "bar-chart", iconColor: "#22C55E", iconBg: "#DCFCE7", route: null, action: "metricas" },
   { id: "arquivos-uteis", title: "Arquivos Úteis", description: "Vouchers, Artes, Termos e mais", icon: "description", iconColor: "#FF9012", iconBg: "#FFF3E0", route: null, action: "arquivos-uteis" },
-  { id: "suporte", title: "Suporte", description: "Vamos resolver seu problema", icon: "help-outline", iconColor: "#DF007E", iconBg: "#FCE4EC", route: null, action: "suporte" },
+  { id: "suporte", title: "Suporte", description: "Vamos resolver seu problema", icon: "chat", iconColor: "#25D366", iconBg: "#E8F5E9", route: null, action: "suporte" },
 ];
 
 const PORTAL_CARDS_COLABORADOR = [
   { id: "documentos", title: "Documentos", description: "Acesse Notas Fiscais e Relatórios", icon: "folder", iconColor: "#003FC3", iconBg: "#E6F0FF", route: "/(tabs)/files" },
-  { id: "suporte", title: "Suporte", description: "Vamos resolver seu problema", icon: "help-outline", iconColor: "#DF007E", iconBg: "#FCE4EC", route: null, action: "suporte" },
+  { id: "suporte", title: "Suporte", description: "Vamos resolver seu problema", icon: "chat", iconColor: "#25D366", iconBg: "#E8F5E9", route: null, action: "suporte" },
 ];
 
 export default function HomeScreen() {
@@ -70,6 +70,19 @@ export default function HomeScreen() {
   const [newPostUnidade, setNewPostUnidade] = useState("geral");
   const [commentModalPost, setCommentModalPost] = useState<any>(null);
   const [newComment, setNewComment] = useState("");
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
+
+  const toggleComments = (postId: string) => {
+    setExpandedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+      }
+      return newSet;
+    });
+  };
 
   const isLargeScreen = width >= 768;
   const portalCards = isSocio ? PORTAL_CARDS_SOCIO : PORTAL_CARDS_COLABORADOR;
@@ -237,15 +250,24 @@ export default function HomeScreen() {
                     <Text style={styles.birthdayDate}>
                       {person.birthDate.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
                     </Text>
-                    <Pressable
-                      style={({ pressed }) => [
-                        styles.birthdayWishButton,
-                        pressed && styles.birthdayWishButtonPressed,
-                      ]}
-                      onPress={() => sendBirthdayWish(person.id)}
-                    >
-                      <Text style={styles.birthdayWishText}>Parabéns 🎉</Text>
-                    </Pressable>
+                    {/* Botão Parabéns só aparece para aniversário do dia */}
+                    {person.isTodayBirthday && (
+                      <Pressable
+                        style={({ pressed }) => [
+                          styles.birthdayWishButton,
+                          pressed && styles.birthdayWishButtonPressed,
+                        ]}
+                        onPress={() => {
+                          sendBirthdayWish(person.id);
+                          // Feedback visual de sucesso
+                          if (Platform.OS === "web") {
+                            alert(`🎉 Parabéns enviado para ${person.name}!`);
+                          }
+                        }}
+                      >
+                        <Text style={styles.birthdayWishText}>🎉 Parabéns</Text>
+                      </Pressable>
+                    )}
                   </View>
                 ))}
               </ScrollView>
@@ -365,7 +387,7 @@ export default function HomeScreen() {
                       )}
                     </View>
 
-                    {/* Ações - Apenas Curtir e Comentar */}
+                    {/* Ações - Curtir, Comentar e Ver comentários */}
                     <View style={styles.postActions}>
                       <Pressable
                         style={styles.postActionButton}
@@ -388,7 +410,49 @@ export default function HomeScreen() {
                         <MaterialIcons name="chat-bubble-outline" size={20} color="#6B7280" />
                         <Text style={styles.postActionText}>Comentar</Text>
                       </Pressable>
+                      {post.comments > 0 && (
+                        <Pressable
+                          style={styles.postActionButton}
+                          onPress={() => toggleComments(post.id)}
+                        >
+                          <MaterialIcons 
+                            name={expandedComments.has(post.id) ? "expand-less" : "expand-more"} 
+                            size={20} 
+                            color="#6B7280" 
+                          />
+                          <Text style={styles.postActionText}>
+                            {expandedComments.has(post.id) ? "Ocultar" : "Ver comentários"}
+                          </Text>
+                        </Pressable>
+                      )}
                     </View>
+
+                    {/* Comentários expandidos inline */}
+                    {expandedComments.has(post.id) && (
+                      <View style={styles.inlineComments}>
+                        {getComments(post.id).map((comment: any) => (
+                          <View key={comment.id} style={styles.inlineCommentItem}>
+                            <ProfilePhoto
+                              uri={comment.authorAvatar}
+                              name={comment.authorName}
+                              size={28}
+                            />
+                            <View style={styles.inlineCommentContent}>
+                              <Text style={styles.inlineCommentAuthor}>{comment.authorName}</Text>
+                              <Text style={styles.inlineCommentText}>{comment.content}</Text>
+                            </View>
+                            {comment.authorId === user?.id && (
+                              <Pressable
+                                style={styles.deleteCommentButton}
+                                onPress={() => deleteComment(comment.id)}
+                              >
+                                <MaterialIcons name="delete-outline" size={16} color="#EF4444" />
+                              </Pressable>
+                            )}
+                          </View>
+                        ))}
+                      </View>
+                    )}
                   </View>
                 ))
               )}
@@ -927,5 +991,30 @@ const styles = StyleSheet.create({
     borderTopColor: "#E5E7EB",
     paddingHorizontal: 16,
     paddingVertical: 8,
+  },
+  inlineComments: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+  },
+  inlineCommentItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingVertical: 8,
+  },
+  inlineCommentContent: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  inlineCommentAuthor: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  inlineCommentText: {
+    fontSize: 12,
+    color: "#374151",
+    marginTop: 2,
   },
 });

@@ -19,8 +19,21 @@ function ChatModal({
 }) {
   const insets = useSafeAreaInsets();
   const { user } = useAppAuth();
-  const { getMessages, sendMessage } = useData();
+  const { getMessages, sendMessage, deleteMessage, deleteConversation } = useData();
   const [message, setMessage] = useState("");
+  const [showDeleteMenu, setShowDeleteMenu] = useState<number | null>(null);
+
+  const handleDeleteMessage = (messageId: number) => {
+    deleteMessage(messageId);
+    setShowDeleteMenu(null);
+  };
+
+  const handleDeleteConversation = () => {
+    if (conversation) {
+      deleteConversation(conversation.id);
+      onClose();
+    }
+  };
 
   if (!conversation) return null;
 
@@ -48,6 +61,12 @@ function ChatModal({
             <Text className="flex-1 ml-3 font-semibold text-white text-lg">
               {conversation.name}
             </Text>
+            <TouchableOpacity 
+              onPress={handleDeleteConversation}
+              className="p-2"
+            >
+              <IconSymbol name="trash.fill" size={20} color="#FFFFFF" />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -58,7 +77,11 @@ function ChatModal({
           renderItem={({ item }) => {
             const isMe = item.senderId === user?.id;
             return (
-              <View className={`mx-4 my-1 max-w-[80%] ${isMe ? "self-end" : "self-start"}`}>
+              <TouchableOpacity 
+                className={`mx-4 my-1 max-w-[80%] ${isMe ? "self-end" : "self-start"}`}
+                onLongPress={() => isMe && setShowDeleteMenu(item.id)}
+                activeOpacity={0.8}
+              >
                 <View
                   className="px-4 py-2 rounded-2xl"
                   style={{ backgroundColor: isMe ? "#003FC3" : "#FFFFFF" }}
@@ -72,7 +95,24 @@ function ChatModal({
                     {item.content}
                   </Text>
                 </View>
-              </View>
+                {showDeleteMenu === item.id && isMe && (
+                  <View className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                    <TouchableOpacity 
+                      className="flex-row items-center px-4 py-2"
+                      onPress={() => handleDeleteMessage(item.id)}
+                    >
+                      <IconSymbol name="trash.fill" size={16} color="#EF4444" />
+                      <Text className="ml-2 text-red-500 text-sm">Apagar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      className="flex-row items-center px-4 py-2 border-t border-gray-100"
+                      onPress={() => setShowDeleteMenu(null)}
+                    >
+                      <Text className="text-gray-500 text-sm">Cancelar</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </TouchableOpacity>
             );
           }}
           contentContainerStyle={{ paddingVertical: 16 }}
