@@ -133,3 +133,13 @@
 - [x] Atualizar tela de Métricas para consumir dados da API
 - [x] Exibir 5 indicadores: Investimento, Visualizações, Pessoas Alcançadas, Engajamento, Cliques
 - [x] Testar integração com testes unitários
+
+## Integração v4.2 - Notificações de Aniversário
+- [x] Criar contexto de notificações internas (NotificationContext)
+- [x] Implementar verificação diária de aniversariantes
+- [x] Configurar expo-notifications para push notifications
+- [x] Criar tela de listagem de notificações
+- [x] Atualizar sininho com badge de notificações não lidas
+- [x] Disparar notificação no dia do aniversário de cada colaborador
+- [x] Permitir marcar notificações como lidas
+- [x] Testar fluxo completo de notificações (24 testes passando)

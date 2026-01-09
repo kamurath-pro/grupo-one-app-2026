@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl, useWindowDimensions, Modal, TextInput, Linking, Platform } from "react-native";
 import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -6,6 +6,7 @@ import { router } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAppAuth } from "@/lib/auth-context";
 import { useData } from "@/lib/data-context";
+import { useNotifications } from "@/lib/notification-context";
 import { AppHeader } from "@/components/app-header";
 // FooterLogos agora está fixo no _layout.tsx
 import { ProfilePhoto } from "@/components/profile-photo";
@@ -45,6 +46,21 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const { user, isSocio } = useAppAuth();
   const { posts, addPost, likePost, addComment, getComments, deleteComment, allUsers, birthdays, sendBirthdayWish } = useData();
+  const { unreadCount, addNotification } = useNotifications();
+
+  // Verificar aniversariantes de hoje e criar notificações
+  useEffect(() => {
+    const todayBirthdays = birthdays.filter(b => b.isTodayBirthday);
+    todayBirthdays.forEach(birthday => {
+      // Criar notificação interna para cada aniversário de hoje
+      addNotification({
+        type: "birthday",
+        title: "🎂 Aniversário hoje!",
+        message: `Hoje é aniversário de ${birthday.name} (${birthday.unitName}). Não esqueça de dar os parabéns!`,
+        data: { birthdayId: birthday.id },
+      });
+    });
+  }, []); // Executar apenas uma vez ao carregar
 
   const [refreshing, setRefreshing] = useState(false);
   const [selectedUnidade, setSelectedUnidade] = useState("geral");
@@ -113,7 +129,10 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: "#F5F7FA" }}>
       {/* Header com Logo Espaçolaser */}
-      <AppHeader />
+      <AppHeader 
+        notificationCount={unreadCount}
+        onNotificationPress={() => router.push("/notifications" as any)}
+      />
 
       <ScrollView
         style={{ flex: 1 }}
