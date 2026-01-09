@@ -125,3 +125,11 @@
 - [x] Comentários: apenas o autor pode excluir
 - [x] Comentários: permanecem até exclusão
 - [x] Corrigir funcionamento atual dos comentários
+
+## Integração v4.1 - Métricas em Tempo Real
+- [x] Analisar estrutura das planilhas do Google Sheets por unidade
+- [x] Criar serviço de integração com Google Sheets API
+- [x] Implementar busca de dados em tempo real
+- [x] Atualizar tela de Métricas para consumir dados da API
+- [x] Exibir 5 indicadores: Investimento, Visualizações, Pessoas Alcançadas, Engajamento, Cliques
+- [x] Testar integração com testes unitários
