@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Modal, Image, useWindowDimensions } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Modal, Image } from "react-native";
 import { router } from "expo-router";
-import { ScreenContainer } from "@/components/screen-container";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppAuth, UNITS } from "@/lib/auth-context";
-import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 
 type AuthMode = "login" | "register" | "pending";
@@ -20,16 +19,14 @@ function UnitSelector({
   onSelect: (id: number) => void;
   selectedId: number;
 }) {
-  const colors = useColors();
-
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 justify-end" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-        <View className="rounded-t-3xl max-h-[70%]" style={{ backgroundColor: colors.background }}>
-          <View className="flex-row justify-between items-center p-4 border-b" style={{ borderColor: colors.border }}>
-            <Text className="text-xl font-bold text-foreground">Selecione sua Unidade</Text>
+        <View className="bg-white rounded-t-3xl max-h-[70%]">
+          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+            <Text className="text-xl font-bold text-gray-900">Selecione sua Unidade</Text>
             <TouchableOpacity onPress={onClose}>
-              <IconSymbol name="xmark" size={24} color={colors.muted} />
+              <IconSymbol name="xmark" size={24} color="#6B7280" />
             </TouchableOpacity>
           </View>
           <ScrollView className="p-4">
@@ -38,9 +35,9 @@ function UnitSelector({
                 key={unit.id}
                 className="flex-row items-center p-4 mb-2 rounded-xl"
                 style={{
-                  backgroundColor: selectedId === unit.id ? `${colors.primary}15` : colors.surface,
+                  backgroundColor: selectedId === unit.id ? "#E6F0FF" : "#F5F7FA",
                   borderWidth: selectedId === unit.id ? 1 : 0,
-                  borderColor: colors.primary,
+                  borderColor: "#003FC3",
                 }}
                 onPress={() => {
                   onSelect(unit.id);
@@ -49,11 +46,11 @@ function UnitSelector({
                 activeOpacity={0.7}
               >
                 <View className="flex-1">
-                  <Text className="font-medium text-foreground">{unit.name}</Text>
-                  <Text className="text-sm text-muted">{unit.city} - {unit.state}</Text>
+                  <Text className="font-medium text-gray-900">{unit.name}</Text>
+                  <Text className="text-sm text-gray-500">{unit.city} - {unit.state}</Text>
                 </View>
                 {selectedId === unit.id && (
-                  <IconSymbol name="checkmark" size={20} color={colors.primary} />
+                  <IconSymbol name="checkmark" size={20} color="#003FC3" />
                 )}
               </TouchableOpacity>
             ))}
@@ -65,27 +62,24 @@ function UnitSelector({
 }
 
 export default function LoginScreen() {
-  const colors = useColors();
+  const insets = useSafeAreaInsets();
   const { login, register } = useAppAuth();
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [userType, setUserType] = useState<UserType>("colaborador");
   
-  // Login fields
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   
-  // Register fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [selectedUnitId, setSelectedUnitId] = useState(1);
-  const [selectedRole, setSelectedRole] = useState<"gerente" | "consultora">("consultora");
-  const [showUnitSelector, setShowUnitSelector] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<"consultora" | "gerente">("consultora");
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [showUnitSelector, setShowUnitSelector] = useState(false);
 
   const selectedUnit = UNITS.find((u) => u.id === selectedUnitId);
 
@@ -95,8 +89,6 @@ export default function LoginScreen() {
     setName("");
     setEmail("");
     setConfirmPassword("");
-    setSelectedUnitId(1);
-    setSelectedRole("consultora");
     setError("");
   };
 
@@ -113,17 +105,15 @@ export default function LoginScreen() {
 
     if (result.success) {
       router.replace("/(tabs)");
-    } else if (result.pending) {
-      setMode("pending");
     } else {
-      setError(result.error || "Credenciais inválidas");
+      setError(result.error || "Erro ao fazer login");
     }
 
     setLoading(false);
   };
 
   const handleRegister = async () => {
-    if (!name.trim() || !email.trim() || !password.trim()) {
+    if (!name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
       setError("Preencha todos os campos");
       return;
     }
@@ -158,395 +148,19 @@ export default function LoginScreen() {
     setLoading(false);
   };
 
-  const renderLoginForm = () => (
-    <>
-      {/* User Type Selector */}
-      <View className="mb-4">
-        <Text className="text-sm font-medium text-muted mb-2">Tipo de acesso:</Text>
-        <View className="flex-row gap-2">
-          <TouchableOpacity
-            className="flex-1 py-3 rounded-xl items-center"
-            style={{
-              backgroundColor: userType === "socio" ? colors.primary : colors.surface,
-            }}
-            onPress={() => {
-              setUserType("socio");
-              setIdentifier("");
-              setPassword("");
-              setError("");
-            }}
-          >
-            <Text
-              className="font-semibold"
-              style={{ color: userType === "socio" ? "#fff" : colors.foreground }}
-            >
-              Sócio(a)
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="flex-1 py-3 rounded-xl items-center"
-            style={{
-              backgroundColor: userType === "colaborador" ? colors.primary : colors.surface,
-            }}
-            onPress={() => {
-              setUserType("colaborador");
-              setIdentifier("");
-              setPassword("");
-              setError("");
-            }}
-          >
-            <Text
-              className="font-semibold"
-              style={{ color: userType === "colaborador" ? "#fff" : colors.foreground }}
-            >
-              Colaborador(a)
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Identifier Input */}
-      <View>
-        <Text className="text-sm font-medium text-foreground mb-2">
-          {userType === "socio" ? "Seu nome" : "E-mail"}
-        </Text>
-        <View
-          className="flex-row items-center rounded-xl px-4 border"
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-        >
-          <IconSymbol 
-            name={userType === "socio" ? "person.fill" : "envelope.fill"} 
-            size={20} 
-            color={colors.muted} 
-          />
-          <TextInput
-            className="flex-1 py-4 px-3 text-base"
-            style={{ color: colors.foreground }}
-            placeholder={userType === "socio" ? "Ex: Lia, Márcio, Raquel..." : "seu@email.com"}
-            placeholderTextColor={colors.muted}
-            value={identifier}
-            onChangeText={setIdentifier}
-            keyboardType={userType === "socio" ? "default" : "email-address"}
-            autoCapitalize={userType === "socio" ? "words" : "none"}
-            returnKeyType="next"
-          />
-        </View>
-        {userType === "socio" && (
-          <Text className="text-xs text-muted mt-1 ml-1">
-            Digite apenas seu primeiro nome
-          </Text>
-        )}
-      </View>
-
-      {/* Password Input */}
-      <View>
-        <Text className="text-sm font-medium text-foreground mb-2">Senha</Text>
-        <View
-          className="flex-row items-center rounded-xl px-4 border"
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-        >
-          <IconSymbol name="lock.fill" size={20} color={colors.muted} />
-          <TextInput
-            className="flex-1 py-4 px-3 text-base"
-            style={{ color: colors.foreground }}
-            placeholder={userType === "socio" ? "Senha de 4 dígitos" : "Sua senha"}
-            placeholderTextColor={colors.muted}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            keyboardType={userType === "socio" ? "numeric" : "default"}
-            maxLength={userType === "socio" ? 4 : undefined}
-            returnKeyType="done"
-            onSubmitEditing={handleLogin}
-          />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <IconSymbol
-              name={showPassword ? "eye.slash.fill" : "eye.fill"}
-              size={20}
-              color={colors.muted}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Login Button */}
-      <TouchableOpacity
-        className="rounded-xl py-4 items-center mt-2"
-        style={{
-          backgroundColor: colors.primary,
-          opacity: loading ? 0.7 : 1,
-        }}
-        onPress={handleLogin}
-        disabled={loading}
-        activeOpacity={0.8}
-      >
-        {loading ? (
-          <ActivityIndicator color="#FFFFFF" />
-        ) : (
-          <Text className="text-white font-semibold text-base">Entrar</Text>
-        )}
-      </TouchableOpacity>
-
-      {/* Register Link - Only for colaboradores */}
-      {userType === "colaborador" && (
-        <>
-          <View className="flex-row items-center my-4">
-            <View className="flex-1 h-px" style={{ backgroundColor: colors.border }} />
-            <Text className="mx-4 text-muted text-sm">Primeira vez aqui?</Text>
-            <View className="flex-1 h-px" style={{ backgroundColor: colors.border }} />
-          </View>
-
-          <TouchableOpacity
-            className="rounded-xl py-4 items-center border"
-            style={{ borderColor: colors.primary }}
-            onPress={() => {
-              resetForm();
-              setMode("register");
-            }}
-            activeOpacity={0.8}
-          >
-            <Text style={{ color: colors.primary }} className="font-semibold text-base">
-              Criar minha conta
-            </Text>
-          </TouchableOpacity>
-        </>
-      )}
-
-      {/* Info for sócios */}
-      {userType === "socio" && (
-        <View className="mt-6 p-4 rounded-xl" style={{ backgroundColor: colors.surface }}>
-          <Text className="text-sm text-muted text-center">
-            <Text className="font-semibold">Sócios:</Text> Use seu primeiro nome e a senha de 4 dígitos fornecida pela administração.
-          </Text>
-        </View>
-      )}
-    </>
-  );
-
-  const renderRegisterForm = () => (
-    <>
-      {/* Info Banner */}
-      <View className="p-3 rounded-xl mb-2 flex-row items-center" style={{ backgroundColor: `${colors.primary}15` }}>
-        <IconSymbol name="info.circle.fill" size={18} color={colors.primary} />
-        <Text className="flex-1 ml-2 text-sm" style={{ color: colors.primary }}>
-          Cadastro para gerentes e consultoras. Após o cadastro, aguarde a aprovação do administrador.
-        </Text>
-      </View>
-
-      {/* Name Input */}
-      <View>
-        <Text className="text-sm font-medium text-foreground mb-2">Nome completo</Text>
-        <View
-          className="flex-row items-center rounded-xl px-4 border"
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-        >
-          <IconSymbol name="person.fill" size={20} color={colors.muted} />
-          <TextInput
-            className="flex-1 py-4 px-3 text-base"
-            style={{ color: colors.foreground }}
-            placeholder="Seu nome"
-            placeholderTextColor={colors.muted}
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="words"
-            returnKeyType="next"
-          />
-        </View>
-      </View>
-
-      {/* Email Input */}
-      <View>
-        <Text className="text-sm font-medium text-foreground mb-2">E-mail</Text>
-        <View
-          className="flex-row items-center rounded-xl px-4 border"
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-        >
-          <IconSymbol name="envelope.fill" size={20} color={colors.muted} />
-          <TextInput
-            className="flex-1 py-4 px-3 text-base"
-            style={{ color: colors.foreground }}
-            placeholder="seu@email.com"
-            placeholderTextColor={colors.muted}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-            returnKeyType="next"
-          />
-        </View>
-      </View>
-
-      {/* Role Selector */}
-      <View>
-        <Text className="text-sm font-medium text-foreground mb-2">Cargo</Text>
-        <View className="flex-row gap-2">
-          <TouchableOpacity
-            className="flex-1 py-3 rounded-xl items-center"
-            style={{
-              backgroundColor: selectedRole === "consultora" ? colors.primary : colors.surface,
-            }}
-            onPress={() => setSelectedRole("consultora")}
-          >
-            <Text
-              className="font-medium"
-              style={{ color: selectedRole === "consultora" ? "#fff" : colors.foreground }}
-            >
-              Consultora
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="flex-1 py-3 rounded-xl items-center"
-            style={{
-              backgroundColor: selectedRole === "gerente" ? colors.primary : colors.surface,
-            }}
-            onPress={() => setSelectedRole("gerente")}
-          >
-            <Text
-              className="font-medium"
-              style={{ color: selectedRole === "gerente" ? "#fff" : colors.foreground }}
-            >
-              Gerente
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Unit Selector */}
-      <View>
-        <Text className="text-sm font-medium text-foreground mb-2">Unidade onde trabalha</Text>
-        <TouchableOpacity
-          className="flex-row items-center rounded-xl px-4 py-4 border"
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-          onPress={() => setShowUnitSelector(true)}
-          activeOpacity={0.7}
-        >
-          <IconSymbol name="house.fill" size={20} color={colors.muted} />
-          <Text className="flex-1 px-3 text-base" style={{ color: colors.foreground }}>
-            {selectedUnit?.name || "Selecione"}
-          </Text>
-          <IconSymbol name="chevron.right" size={20} color={colors.muted} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Password Input */}
-      <View>
-        <Text className="text-sm font-medium text-foreground mb-2">Crie uma senha</Text>
-        <View
-          className="flex-row items-center rounded-xl px-4 border"
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-        >
-          <IconSymbol name="lock.fill" size={20} color={colors.muted} />
-          <TextInput
-            className="flex-1 py-4 px-3 text-base"
-            style={{ color: colors.foreground }}
-            placeholder="Mínimo 4 caracteres"
-            placeholderTextColor={colors.muted}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            returnKeyType="next"
-          />
-        </View>
-      </View>
-
-      {/* Confirm Password Input */}
-      <View>
-        <Text className="text-sm font-medium text-foreground mb-2">Confirmar senha</Text>
-        <View
-          className="flex-row items-center rounded-xl px-4 border"
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-        >
-          <IconSymbol name="lock.fill" size={20} color={colors.muted} />
-          <TextInput
-            className="flex-1 py-4 px-3 text-base"
-            style={{ color: colors.foreground }}
-            placeholder="Repita a senha"
-            placeholderTextColor={colors.muted}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-            returnKeyType="done"
-            onSubmitEditing={handleRegister}
-          />
-        </View>
-      </View>
-
-      {/* Register Button */}
-      <TouchableOpacity
-        className="rounded-xl py-4 items-center mt-2"
-        style={{
-          backgroundColor: colors.primary,
-          opacity: loading ? 0.7 : 1,
-        }}
-        onPress={handleRegister}
-        disabled={loading}
-        activeOpacity={0.8}
-      >
-        {loading ? (
-          <ActivityIndicator color="#FFFFFF" />
-        ) : (
-          <Text className="text-white font-semibold text-base">Solicitar Cadastro</Text>
-        )}
-      </TouchableOpacity>
-
-      {/* Login Link */}
-      <TouchableOpacity
-        className="mt-4 items-center"
-        onPress={() => {
-          resetForm();
-          setMode("login");
-        }}
-      >
-        <Text className="text-muted">
-          Já tem conta?{" "}
-          <Text style={{ color: colors.primary }} className="font-semibold">
-            Entrar
-          </Text>
-        </Text>
-      </TouchableOpacity>
-    </>
-  );
-
-  const renderPendingScreen = () => (
-    <View className="items-center py-8">
-      <View
-        className="w-20 h-20 rounded-full items-center justify-center mb-6"
-        style={{ backgroundColor: `${colors.warning}20` }}
-      >
-        <IconSymbol name="clock.fill" size={40} color={colors.warning} />
-      </View>
-      
-      <Text className="text-2xl font-bold text-foreground text-center mb-2">
-        Cadastro Enviado!
-      </Text>
-      
-      <Text className="text-base text-muted text-center px-4 mb-6">
-        Seu cadastro foi enviado para aprovação. Você receberá acesso assim que o administrador aprovar sua solicitação.
-      </Text>
-
-      <View className="w-full p-4 rounded-xl mb-6" style={{ backgroundColor: colors.surface }}>
-        <Text className="text-sm text-muted text-center">
-          Enquanto isso, entre em contato com sua gerente ou sócio(a) para agilizar o processo.
-        </Text>
-      </View>
-
-      <TouchableOpacity
-        className="rounded-xl py-4 px-8"
-        style={{ backgroundColor: colors.primary }}
-        onPress={() => {
-          resetForm();
-          setMode("login");
-        }}
-        activeOpacity={0.8}
-      >
-        <Text className="text-white font-semibold text-base">Voltar ao Login</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
   return (
-    <ScreenContainer edges={["top", "bottom", "left", "right"]} containerClassName="bg-white">
+    <View className="flex-1 bg-white">
+      {/* Header Azul */}
+      <View style={{ backgroundColor: "#003FC3", paddingTop: insets.top }}>
+        <View className="items-center py-6">
+          <Image
+            source={require("@/assets/images/logo-grupo-one.png")}
+            style={{ width: 140, height: 50 }}
+            resizeMode="contain"
+          />
+        </View>
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
@@ -556,40 +170,330 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className="flex-1 justify-center px-6 py-8" style={{ maxWidth: 480, alignSelf: 'center', width: '100%', backgroundColor: '#FFFFFF' }}>
-            {/* Logo Area - Grupo ONE logo */}
-            <View className="items-center mb-8">
-              <Image
-                source={require("@/assets/images/logo-grupo-one.png")}
-                className="w-40 h-28 mb-2"
-                resizeMode="contain"
-              />
-              <Text className="text-sm text-muted mt-1">
-                {mode === "login" ? "Acesse sua conta" : mode === "register" ? "Cadastro" : ""}
-              </Text>
-            </View>
-
-            {/* Form */}
-            <View className="gap-4">
-              {/* Error Message */}
-              {error && mode !== "pending" ? (
-                <View className="flex-row items-center gap-2 px-2 py-3 rounded-xl" style={{ backgroundColor: `${colors.error}15` }}>
-                  <IconSymbol name="exclamationmark.triangle.fill" size={16} color={colors.error} />
-                  <Text className="flex-1 text-sm" style={{ color: colors.error }}>{error}</Text>
+          <View className="flex-1 px-6 py-6" style={{ maxWidth: 480, alignSelf: 'center', width: '100%' }}>
+            
+            {mode === "pending" ? (
+              /* Tela de Aguardando Aprovação */
+              <View className="items-center py-8">
+                <View className="w-20 h-20 rounded-full items-center justify-center mb-6" style={{ backgroundColor: "#FFF3E0" }}>
+                  <IconSymbol name="clock.fill" size={40} color="#FF9012" />
                 </View>
-              ) : null}
+                
+                <Text className="text-2xl font-bold text-gray-900 text-center mb-2">
+                  Cadastro Enviado!
+                </Text>
+                
+                <Text className="text-base text-gray-500 text-center px-4 mb-6">
+                  Seu cadastro foi enviado para aprovação. Você receberá acesso assim que o administrador aprovar sua solicitação.
+                </Text>
 
-              {mode === "login" && renderLoginForm()}
-              {mode === "register" && renderRegisterForm()}
-              {mode === "pending" && renderPendingScreen()}
-            </View>
+                <View className="w-full p-4 rounded-xl mb-6 bg-gray-100">
+                  <Text className="text-sm text-gray-600 text-center">
+                    Entre em contato com sua gerente ou sócio(a) para agilizar o processo.
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  className="rounded-xl py-4 px-8"
+                  style={{ backgroundColor: "#003FC3" }}
+                  onPress={() => {
+                    resetForm();
+                    setMode("login");
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text className="text-white font-semibold text-base">Voltar ao Login</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                {/* Título */}
+                <Text className="text-2xl font-bold text-gray-900 text-center mb-6">
+                  {mode === "login" ? "Acesse sua conta" : "Criar conta"}
+                </Text>
+
+                {/* Erro */}
+                {error ? (
+                  <View className="flex-row items-center gap-2 px-3 py-3 rounded-xl mb-4" style={{ backgroundColor: "#FDE8E8" }}>
+                    <IconSymbol name="exclamationmark.triangle.fill" size={16} color="#DF007E" />
+                    <Text className="flex-1 text-sm" style={{ color: "#DF007E" }}>{error}</Text>
+                  </View>
+                ) : null}
+
+                {mode === "login" ? (
+                  /* Formulário de Login */
+                  <>
+                    {/* Seletor de Tipo */}
+                    <Text className="text-sm font-medium text-gray-600 mb-2">Tipo de acesso:</Text>
+                    <View className="flex-row gap-3 mb-5">
+                      <TouchableOpacity
+                        className="flex-1 py-3 rounded-xl items-center"
+                        style={{
+                          backgroundColor: userType === "socio" ? "#003FC3" : "#F5F7FA",
+                        }}
+                        onPress={() => {
+                          setUserType("socio");
+                          setIdentifier("");
+                          setPassword("");
+                          setError("");
+                        }}
+                      >
+                        <Text
+                          className="font-semibold"
+                          style={{ color: userType === "socio" ? "#FFFFFF" : "#1A1A2E" }}
+                        >
+                          Sócio(a)
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        className="flex-1 py-3 rounded-xl items-center"
+                        style={{
+                          backgroundColor: userType === "colaborador" ? "#003FC3" : "#F5F7FA",
+                        }}
+                        onPress={() => {
+                          setUserType("colaborador");
+                          setIdentifier("");
+                          setPassword("");
+                          setError("");
+                        }}
+                      >
+                        <Text
+                          className="font-semibold"
+                          style={{ color: userType === "colaborador" ? "#FFFFFF" : "#1A1A2E" }}
+                        >
+                          Colaborador(a)
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    {/* Campo de Identificação */}
+                    <Text className="text-sm font-medium text-gray-600 mb-2">
+                      {userType === "socio" ? "Nome" : "E-mail"}
+                    </Text>
+                    <View className="flex-row items-center rounded-xl px-4 border border-gray-200 bg-gray-50 mb-4">
+                      <IconSymbol 
+                        name={userType === "socio" ? "person.fill" : "envelope.fill"} 
+                        size={20} 
+                        color="#6B7280" 
+                      />
+                      <TextInput
+                        className="flex-1 py-4 px-3 text-base text-gray-900"
+                        placeholder={userType === "socio" ? "Seu nome" : "seu@email.com"}
+                        placeholderTextColor="#9CA3AF"
+                        value={identifier}
+                        onChangeText={setIdentifier}
+                        keyboardType={userType === "socio" ? "default" : "email-address"}
+                        autoCapitalize={userType === "socio" ? "words" : "none"}
+                        returnKeyType="next"
+                      />
+                    </View>
+
+                    {/* Campo de Senha */}
+                    <Text className="text-sm font-medium text-gray-600 mb-2">
+                      Senha {userType === "socio" && "(4 dígitos)"}
+                    </Text>
+                    <View className="flex-row items-center rounded-xl px-4 border border-gray-200 bg-gray-50 mb-6">
+                      <IconSymbol name="lock.fill" size={20} color="#6B7280" />
+                      <TextInput
+                        className="flex-1 py-4 px-3 text-base text-gray-900"
+                        placeholder={userType === "socio" ? "••••" : "••••••••"}
+                        placeholderTextColor="#9CA3AF"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        keyboardType={userType === "socio" ? "number-pad" : "default"}
+                        maxLength={userType === "socio" ? 4 : undefined}
+                        returnKeyType="done"
+                        onSubmitEditing={handleLogin}
+                      />
+                    </View>
+
+                    {/* Botão de Login */}
+                    <TouchableOpacity
+                      className="rounded-xl py-4 items-center mb-4"
+                      style={{ backgroundColor: "#003FC3" }}
+                      onPress={handleLogin}
+                      disabled={loading}
+                      activeOpacity={0.8}
+                    >
+                      {loading ? (
+                        <ActivityIndicator color="#FFFFFF" />
+                      ) : (
+                        <Text className="text-white font-semibold text-base">Entrar</Text>
+                      )}
+                    </TouchableOpacity>
+
+                    {/* Link para Cadastro (apenas colaboradores) */}
+                    {userType === "colaborador" && (
+                      <TouchableOpacity
+                        onPress={() => {
+                          resetForm();
+                          setMode("register");
+                        }}
+                        className="items-center py-2"
+                      >
+                        <Text className="text-gray-500">
+                          Não tem conta?{" "}
+                          <Text style={{ color: "#003FC3" }} className="font-semibold">
+                            Cadastre-se
+                          </Text>
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </>
+                ) : (
+                  /* Formulário de Cadastro */
+                  <>
+                    {/* Nome */}
+                    <Text className="text-sm font-medium text-gray-600 mb-2">Nome completo</Text>
+                    <View className="flex-row items-center rounded-xl px-4 border border-gray-200 bg-gray-50 mb-4">
+                      <IconSymbol name="person.fill" size={20} color="#6B7280" />
+                      <TextInput
+                        className="flex-1 py-4 px-3 text-base text-gray-900"
+                        placeholder="Seu nome"
+                        placeholderTextColor="#9CA3AF"
+                        value={name}
+                        onChangeText={setName}
+                        autoCapitalize="words"
+                        returnKeyType="next"
+                      />
+                    </View>
+
+                    {/* E-mail */}
+                    <Text className="text-sm font-medium text-gray-600 mb-2">E-mail</Text>
+                    <View className="flex-row items-center rounded-xl px-4 border border-gray-200 bg-gray-50 mb-4">
+                      <IconSymbol name="envelope.fill" size={20} color="#6B7280" />
+                      <TextInput
+                        className="flex-1 py-4 px-3 text-base text-gray-900"
+                        placeholder="seu@email.com"
+                        placeholderTextColor="#9CA3AF"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        returnKeyType="next"
+                      />
+                    </View>
+
+                    {/* Cargo */}
+                    <Text className="text-sm font-medium text-gray-600 mb-2">Cargo</Text>
+                    <View className="flex-row gap-3 mb-4">
+                      <TouchableOpacity
+                        className="flex-1 py-3 rounded-xl items-center"
+                        style={{
+                          backgroundColor: selectedRole === "consultora" ? "#003FC3" : "#F5F7FA",
+                        }}
+                        onPress={() => setSelectedRole("consultora")}
+                      >
+                        <Text
+                          className="font-medium"
+                          style={{ color: selectedRole === "consultora" ? "#FFFFFF" : "#1A1A2E" }}
+                        >
+                          Consultora
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        className="flex-1 py-3 rounded-xl items-center"
+                        style={{
+                          backgroundColor: selectedRole === "gerente" ? "#003FC3" : "#F5F7FA",
+                        }}
+                        onPress={() => setSelectedRole("gerente")}
+                      >
+                        <Text
+                          className="font-medium"
+                          style={{ color: selectedRole === "gerente" ? "#FFFFFF" : "#1A1A2E" }}
+                        >
+                          Gerente
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    {/* Unidade */}
+                    <Text className="text-sm font-medium text-gray-600 mb-2">Unidade</Text>
+                    <TouchableOpacity
+                      className="flex-row items-center rounded-xl px-4 py-4 border border-gray-200 bg-gray-50 mb-4"
+                      onPress={() => setShowUnitSelector(true)}
+                      activeOpacity={0.7}
+                    >
+                      <IconSymbol name="building.2.fill" size={20} color="#6B7280" />
+                      <Text className="flex-1 px-3 text-base text-gray-900">
+                        {selectedUnit?.name || "Selecione"}
+                      </Text>
+                      <IconSymbol name="chevron.right" size={20} color="#6B7280" />
+                    </TouchableOpacity>
+
+                    {/* Senha */}
+                    <Text className="text-sm font-medium text-gray-600 mb-2">Senha</Text>
+                    <View className="flex-row items-center rounded-xl px-4 border border-gray-200 bg-gray-50 mb-4">
+                      <IconSymbol name="lock.fill" size={20} color="#6B7280" />
+                      <TextInput
+                        className="flex-1 py-4 px-3 text-base text-gray-900"
+                        placeholder="Crie uma senha"
+                        placeholderTextColor="#9CA3AF"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        returnKeyType="next"
+                      />
+                    </View>
+
+                    {/* Confirmar Senha */}
+                    <Text className="text-sm font-medium text-gray-600 mb-2">Confirmar senha</Text>
+                    <View className="flex-row items-center rounded-xl px-4 border border-gray-200 bg-gray-50 mb-6">
+                      <IconSymbol name="lock.fill" size={20} color="#6B7280" />
+                      <TextInput
+                        className="flex-1 py-4 px-3 text-base text-gray-900"
+                        placeholder="Repita a senha"
+                        placeholderTextColor="#9CA3AF"
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                        secureTextEntry
+                        returnKeyType="done"
+                        onSubmitEditing={handleRegister}
+                      />
+                    </View>
+
+                    {/* Botão de Cadastro */}
+                    <TouchableOpacity
+                      className="rounded-xl py-4 items-center mb-4"
+                      style={{ backgroundColor: "#003FC3" }}
+                      onPress={handleRegister}
+                      disabled={loading}
+                      activeOpacity={0.8}
+                    >
+                      {loading ? (
+                        <ActivityIndicator color="#FFFFFF" />
+                      ) : (
+                        <Text className="text-white font-semibold text-base">Cadastrar</Text>
+                      )}
+                    </TouchableOpacity>
+
+                    {/* Link para Login */}
+                    <TouchableOpacity
+                      onPress={() => {
+                        resetForm();
+                        setMode("login");
+                      }}
+                      className="items-center py-2"
+                    >
+                      <Text className="text-gray-500">
+                        Já tem conta?{" "}
+                        <Text style={{ color: "#003FC3" }} className="font-semibold">
+                          Entrar
+                        </Text>
+                      </Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </>
+            )}
 
             {/* Footer */}
-            <View className="items-center mt-8">
-              <Text className="text-xs text-muted mb-1">Desenvolvido por</Text>
+            <View className="items-center mt-8 pt-4">
+              <Text className="text-xs text-gray-400 mb-2">Desenvolvido por</Text>
               <Image
                 source={require("@/assets/images/logo-trafegon.png")}
-                className="w-24 h-8"
+                style={{ width: 80, height: 28 }}
                 resizeMode="contain"
               />
             </View>
@@ -597,13 +501,12 @@ export default function LoginScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Unit Selector Modal */}
       <UnitSelector
         visible={showUnitSelector}
         onClose={() => setShowUnitSelector(false)}
         onSelect={setSelectedUnitId}
         selectedId={selectedUnitId}
       />
-    </ScreenContainer>
+    </View>
   );
 }

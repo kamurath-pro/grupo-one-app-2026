@@ -40,3 +40,17 @@
 - [x] Atualizar paleta de cores conforme manual de marca Espaçolaser (cores clássicas)
 - [x] Aplicar fundo branco na tela de login
 - [x] Adicionar fontes Barlow Condensed e Barlow conforme padrão da marca
+
+## Redesign v2.0 - Layout iMidiaApp
+- [x] Criar componente Header azul com logo e notificações
+- [x] Atualizar tema: header azul, corpo branco/cinza claro
+- [x] Redesenhar tela de Login (header azul, corpo branco)
+- [x] Redesenhar tela Home com Portal em grid 2x2
+- [x] Adicionar seção de Comunicados na Home
+- [x] Redesenhar Feed/Mural com filtros por categoria
+- [x] Adicionar botão flutuante (+) para criar conteúdo
+- [x] Redesenhar Chat com seção de aniversáriantes
+- [x] Redesenhar tela de Arquivos
+- [x] Redesenhar tela de Perfil
+- [x] Redesenhar tela de Admin
+- [x] Atualizar Tab Bar com ícones limpos

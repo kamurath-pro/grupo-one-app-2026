@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Alert, Image, useWindowDimensions } from "react-native";
 import { router } from "expo-router";
-import { ScreenContainer } from "@/components/screen-container";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppAuth } from "@/lib/auth-context";
-import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
@@ -12,58 +11,13 @@ import { Platform } from "react-native";
 
 const PROFILE_PHOTO_KEY = "grupo_one_profile_photo";
 
-function ProfileOption({
-  icon,
-  label,
-  value,
-  onPress,
-  danger,
-}: {
-  icon: string;
-  label: string;
-  value?: string;
-  onPress?: () => void;
-  danger?: boolean;
-}) {
-  const colors = useColors();
-
-  return (
-    <TouchableOpacity
-      className="flex-row items-center px-4 py-4"
-      onPress={onPress}
-      activeOpacity={onPress ? 0.7 : 1}
-      disabled={!onPress}
-    >
-      <View
-        className="w-10 h-10 rounded-full items-center justify-center"
-        style={{ backgroundColor: danger ? `${colors.error}15` : colors.surface }}
-      >
-        <IconSymbol
-          name={icon as any}
-          size={20}
-          color={danger ? colors.error : colors.primary}
-        />
-      </View>
-      <View className="flex-1 ml-3">
-        <Text
-          className="font-medium"
-          style={{ color: danger ? colors.error : colors.foreground }}
-        >
-          {label}
-        </Text>
-        {value && <Text className="text-sm text-muted">{value}</Text>}
-      </View>
-      {onPress && (
-        <IconSymbol name="chevron.right" size={20} color={colors.muted} />
-      )}
-    </TouchableOpacity>
-  );
-}
-
 export default function ProfileScreen() {
-  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const { user, isAuthenticated, loading: authLoading, logout } = useAppAuth();
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+
+  const isLargeScreen = width >= 768;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -198,9 +152,9 @@ export default function ProfileScreen() {
 
   if (authLoading) {
     return (
-      <ScreenContainer className="items-center justify-center">
-        <Text className="text-muted">Carregando...</Text>
-      </ScreenContainer>
+      <View className="flex-1 bg-gray-50 items-center justify-center">
+        <Text className="text-gray-400">Carregando...</Text>
+      </View>
     );
   }
 
@@ -208,130 +162,204 @@ export default function ProfileScreen() {
     return null;
   }
 
-  const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
-  const isDesktop = width >= 1024;
-  const contentMaxWidth = isDesktop ? 600 : isTablet ? 500 : undefined;
-
   return (
-    <ScreenContainer>
-      <ScrollView contentContainerStyle={{ alignItems: contentMaxWidth ? 'center' : undefined }}>
-        <View style={{ maxWidth: contentMaxWidth, width: '100%' }}>
-        {/* Header */}
-        <View className="items-center py-8 px-4">
-          <TouchableOpacity onPress={handleChangePhoto} activeOpacity={0.8}>
-            <View className="relative">
-              {profilePhoto ? (
-                <Image
-                  source={{ uri: profilePhoto }}
-                  className="w-24 h-24 rounded-full"
-                  style={{ backgroundColor: colors.surface }}
-                />
-              ) : (
+    <View className="flex-1 bg-gray-50">
+      {/* Header Azul */}
+      <View style={{ backgroundColor: "#003FC3", paddingTop: insets.top }}>
+        <View className="flex-row items-center justify-between px-4 py-3">
+          <Image
+            source={require("@/assets/images/logo-grupo-one.png")}
+            style={{ width: 100, height: 36 }}
+            resizeMode="contain"
+          />
+          <TouchableOpacity className="relative p-2" activeOpacity={0.7}>
+            <IconSymbol name="bell.fill" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={{ maxWidth: isLargeScreen ? 600 : undefined, alignSelf: "center", width: "100%" }}>
+          
+          {/* Card do Perfil */}
+          <View className="bg-white mx-4 mt-4 rounded-xl p-6 items-center border border-gray-100">
+            {/* Foto */}
+            <TouchableOpacity onPress={handleChangePhoto} activeOpacity={0.8}>
+              <View className="relative">
+                {profilePhoto ? (
+                  <Image
+                    source={{ uri: profilePhoto }}
+                    className="w-24 h-24 rounded-full"
+                    style={{ backgroundColor: "#F3F4F6" }}
+                  />
+                ) : (
+                  <View
+                    className="w-24 h-24 rounded-full items-center justify-center"
+                    style={{ backgroundColor: "#003FC3" }}
+                  >
+                    <Text className="text-white text-3xl font-bold">
+                      {user.name.charAt(0)}
+                    </Text>
+                  </View>
+                )}
                 <View
-                  className="w-24 h-24 rounded-full items-center justify-center"
-                  style={{ backgroundColor: colors.primary }}
-                >
-                  <Text className="text-4xl font-bold text-white">{user.name[0]}</Text>
-                </View>
-              )}
-              <View
-                className="absolute bottom-0 right-0 w-8 h-8 rounded-full items-center justify-center border-2"
-                style={{ 
-                  backgroundColor: colors.background, 
-                  borderColor: colors.background 
-                }}
-              >
-                <View
-                  className="w-7 h-7 rounded-full items-center justify-center"
-                  style={{ backgroundColor: colors.primary }}
+                  className="absolute bottom-0 right-0 w-8 h-8 rounded-full items-center justify-center border-2 border-white"
+                  style={{ backgroundColor: "#003FC3" }}
                 >
                   <IconSymbol name="camera.fill" size={14} color="#FFFFFF" />
                 </View>
               </View>
+            </TouchableOpacity>
+            <Text className="text-xs text-gray-400 mt-2">Toque para alterar</Text>
+
+            {/* Nome e Cargo */}
+            <Text className="text-xl font-bold text-gray-900 mt-3">{user.name}</Text>
+            <View className="flex-row items-center mt-2">
+              <View
+                className="px-3 py-1 rounded-full"
+                style={{ backgroundColor: user.appRole === "socio" ? "#FFF3E0" : "#E6F0FF" }}
+              >
+                <Text
+                  className="text-sm font-medium"
+                  style={{ color: user.appRole === "socio" ? "#FF9012" : "#003FC3" }}
+                >
+                  {getRoleLabel(user.appRole)}
+                </Text>
+              </View>
             </View>
-          </TouchableOpacity>
-          <Text className="text-xs text-muted mt-2">Toque para alterar a foto</Text>
-          <Text className="text-2xl font-bold text-foreground mt-2">{user.name}</Text>
-          <Text className="text-base text-muted mt-1">{getRoleLabel(user.appRole)}</Text>
-          <View
-            className="flex-row items-center mt-2 px-3 py-1 rounded-full"
-            style={{ backgroundColor: colors.surface }}
-          >
-            <IconSymbol name="house.fill" size={14} color={colors.primary} />
-            <Text className="ml-2 text-sm" style={{ color: colors.primary }}>
-              {user.unitNames?.[0] || "Grupo ONE"}
-            </Text>
-          </View>
-        </View>
 
-        {/* Info Section */}
-        <View className="mx-4 mb-6">
-          <Text className="text-sm font-medium text-muted mb-2 px-2">INFORMAÇÕES</Text>
-          <View className="rounded-2xl overflow-hidden" style={{ backgroundColor: colors.surface }}>
-            <ProfileOption
-              icon="envelope.fill"
-              label="E-mail"
-              value={user.email}
-            />
-            <View className="h-px mx-4" style={{ backgroundColor: colors.border }} />
-            <ProfileOption
-              icon="person.fill"
-              label="Cargo"
-              value={getRoleLabel(user.appRole)}
-            />
-            <View className="h-px mx-4" style={{ backgroundColor: colors.border }} />
-            <ProfileOption
-              icon="house.fill"
-              label="Unidade"
-              value={user.unitNames?.[0] || "Grupo ONE"}
-            />
-          </View>
-        </View>
+            {/* Unidades */}
+            <View className="flex-row items-center mt-3">
+              <IconSymbol name="building.2.fill" size={16} color="#6B7280" />
+              <Text className="text-sm text-gray-500 ml-2">
+                {user.unitNames?.join(", ") || "Grupo ONE"}
+              </Text>
+            </View>
 
-        {/* App Section */}
-        <View className="mx-4 mb-6">
-          <Text className="text-sm font-medium text-muted mb-2 px-2">APLICATIVO</Text>
-          <View className="rounded-2xl overflow-hidden" style={{ backgroundColor: colors.surface }}>
-            <ProfileOption
-              icon="info.circle.fill"
-              label="Sobre o Grupo ONE"
-              onPress={() => {}}
-            />
-            <View className="h-px mx-4" style={{ backgroundColor: colors.border }} />
-            <ProfileOption
-              icon="doc.fill"
-              label="Termos de Uso"
-              onPress={() => {}}
-            />
-            <View className="h-px mx-4" style={{ backgroundColor: colors.border }} />
-            <ProfileOption
-              icon="lock.fill"
-              label="Política de Privacidade"
-              onPress={() => {}}
-            />
+            {/* Email */}
+            <View className="flex-row items-center mt-2">
+              <IconSymbol name="envelope.fill" size={16} color="#6B7280" />
+              <Text className="text-sm text-gray-500 ml-2">{user.email}</Text>
+            </View>
           </View>
-        </View>
 
-        {/* Logout Section */}
-        <View className="mx-4 mb-8">
-          <View className="rounded-2xl overflow-hidden" style={{ backgroundColor: colors.surface }}>
-            <ProfileOption
-              icon="arrow.left"
-              label="Sair da conta"
+          {/* Seção de Opções */}
+          <View className="mx-4 mt-6">
+            <Text className="text-sm font-medium text-gray-500 mb-3 px-2">CONFIGURAÇÕES</Text>
+            
+            <View className="bg-white rounded-xl overflow-hidden border border-gray-100">
+              {/* Editar Perfil */}
+              <TouchableOpacity
+                className="flex-row items-center p-4 border-b border-gray-100"
+                activeOpacity={0.7}
+              >
+                <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: "#E6F0FF" }}>
+                  <IconSymbol name="person.fill" size={20} color="#003FC3" />
+                </View>
+                <View className="flex-1 ml-3">
+                  <Text className="font-medium text-gray-900">Editar Perfil</Text>
+                  <Text className="text-sm text-gray-500">Altere suas informações</Text>
+                </View>
+                <IconSymbol name="chevron.right" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+
+              {/* Notificações */}
+              <TouchableOpacity
+                className="flex-row items-center p-4 border-b border-gray-100"
+                activeOpacity={0.7}
+              >
+                <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: "#DCFCE7" }}>
+                  <IconSymbol name="bell.fill" size={20} color="#22C55E" />
+                </View>
+                <View className="flex-1 ml-3">
+                  <Text className="font-medium text-gray-900">Notificações</Text>
+                  <Text className="text-sm text-gray-500">Configure seus alertas</Text>
+                </View>
+                <IconSymbol name="chevron.right" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+
+              {/* Privacidade */}
+              <TouchableOpacity
+                className="flex-row items-center p-4"
+                activeOpacity={0.7}
+              >
+                <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: "#FFF3E0" }}>
+                  <IconSymbol name="lock.fill" size={20} color="#FF9012" />
+                </View>
+                <View className="flex-1 ml-3">
+                  <Text className="font-medium text-gray-900">Privacidade</Text>
+                  <Text className="text-sm text-gray-500">Gerencie seus dados</Text>
+                </View>
+                <IconSymbol name="chevron.right" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Seção de Suporte */}
+          <View className="mx-4 mt-6">
+            <Text className="text-sm font-medium text-gray-500 mb-3 px-2">SUPORTE</Text>
+            
+            <View className="bg-white rounded-xl overflow-hidden border border-gray-100">
+              {/* Ajuda */}
+              <TouchableOpacity
+                className="flex-row items-center p-4 border-b border-gray-100"
+                activeOpacity={0.7}
+              >
+                <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: "#E6F0FF" }}>
+                  <IconSymbol name="questionmark.circle.fill" size={20} color="#003FC3" />
+                </View>
+                <View className="flex-1 ml-3">
+                  <Text className="font-medium text-gray-900">Central de Ajuda</Text>
+                  <Text className="text-sm text-gray-500">Dúvidas frequentes</Text>
+                </View>
+                <IconSymbol name="chevron.right" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+
+              {/* Termos */}
+              <TouchableOpacity
+                className="flex-row items-center p-4"
+                activeOpacity={0.7}
+              >
+                <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: "#F3F4F6" }}>
+                  <IconSymbol name="doc.text.fill" size={20} color="#6B7280" />
+                </View>
+                <View className="flex-1 ml-3">
+                  <Text className="font-medium text-gray-900">Termos de Uso</Text>
+                  <Text className="text-sm text-gray-500">Políticas e termos</Text>
+                </View>
+                <IconSymbol name="chevron.right" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Botão Sair */}
+          <View className="mx-4 mt-6">
+            <TouchableOpacity
+              className="bg-white rounded-xl p-4 flex-row items-center justify-center border border-red-200"
               onPress={handleLogout}
-              danger
-            />
+              activeOpacity={0.7}
+            >
+              <IconSymbol name="arrow.right.square.fill" size={20} color="#EF4444" />
+              <Text className="text-red-500 font-semibold ml-2">Sair do Aplicativo</Text>
+            </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Version */}
-        <View className="items-center pb-8">
-          <Text className="text-sm text-muted">Grupo ONE v1.0.0</Text>
-          <Text className="text-xs text-muted mt-1">Desenvolvido por TráfegON</Text>
-        </View>
+          {/* Rodapé com Logo TráfegON */}
+          <View className="items-center mt-8 mb-4">
+            <Text className="text-xs text-gray-400 mb-2">Desenvolvido por</Text>
+            <Image
+              source={require("@/assets/images/logo-trafegon.png")}
+              style={{ width: 100, height: 30 }}
+              resizeMode="contain"
+            />
+            <Text className="text-xs text-gray-400 mt-2">Versão 1.0.0</Text>
+          </View>
         </View>
       </ScrollView>
-    </ScreenContainer>
+    </View>
   );
 }

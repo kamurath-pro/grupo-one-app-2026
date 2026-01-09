@@ -1,23 +1,20 @@
 import { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, ScrollView, useWindowDimensions } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, ScrollView, useWindowDimensions, Image } from "react-native";
 import { router } from "expo-router";
-import { ScreenContainer } from "@/components/screen-container";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppAuth } from "@/lib/auth-context";
 import { useData, Recognition } from "@/lib/data-context";
-import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import * as Haptics from "expo-haptics";
 import { Platform } from "react-native";
 
 const RECOGNITION_TYPES = [
-  { value: "parabens" as const, label: "Parabéns!", emoji: "🎉", description: "Reconheça uma conquista" },
-  { value: "obrigado" as const, label: "Obrigado!", emoji: "🙏", description: "Agradeça pela ajuda" },
-  { value: "destaque" as const, label: "Destaque!", emoji: "⭐", description: "Destaque um bom trabalho" },
+  { value: "parabens" as const, label: "Parabéns!", emoji: "🎉", description: "Reconheça uma conquista", color: "#22C55E", bg: "#DCFCE7" },
+  { value: "obrigado" as const, label: "Obrigado!", emoji: "🙏", description: "Agradeça pela ajuda", color: "#003FC3", bg: "#E6F0FF" },
+  { value: "destaque" as const, label: "Destaque!", emoji: "⭐", description: "Destaque um bom trabalho", color: "#FF9012", bg: "#FFF3E0" },
 ];
 
 function RecognitionCard({ recognition }: { recognition: Recognition }) {
-  const colors = useColors();
-
   const formatTime = (date: Date) => {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
@@ -31,49 +28,34 @@ function RecognitionCard({ recognition }: { recognition: Recognition }) {
     return `${days}d`;
   };
 
-  const getTypeInfo = (type: Recognition["type"]) => {
-    return RECOGNITION_TYPES.find((t) => t.value === type) || RECOGNITION_TYPES[0];
-  };
-
-  const typeInfo = getTypeInfo(recognition.type);
+  const typeInfo = RECOGNITION_TYPES.find((t) => t.value === recognition.type) || RECOGNITION_TYPES[0];
 
   return (
-    <View
-      className="mx-4 mb-4 rounded-2xl p-4"
-      style={{ backgroundColor: colors.surface }}
-    >
+    <View className="bg-white mx-4 mb-3 rounded-xl p-4 border border-gray-100">
       {/* Header */}
       <View className="flex-row items-center mb-3">
-        <View
-          className="w-10 h-10 rounded-full items-center justify-center"
-          style={{ backgroundColor: colors.primary }}
-        >
+        <View className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: "#003FC3" }}>
           <Text className="text-white font-bold">{recognition.senderName[0]}</Text>
         </View>
         <View className="ml-3 flex-1">
-          <Text className="text-foreground">
+          <Text className="text-gray-900">
             <Text className="font-semibold">{recognition.senderName}</Text>
-            <Text className="text-muted"> enviou um reconhecimento para </Text>
+            <Text className="text-gray-500"> enviou para </Text>
             <Text className="font-semibold">{recognition.receiverName}</Text>
           </Text>
-          <Text className="text-xs text-muted mt-1">
+          <Text className="text-xs text-gray-400 mt-1">
             {recognition.senderUnit} → {recognition.receiverUnit} • {formatTime(recognition.createdAt)}
           </Text>
         </View>
       </View>
 
       {/* Recognition Type */}
-      <View
-        className="flex-row items-center p-3 rounded-xl"
-        style={{ backgroundColor: `${colors.accent}15` }}
-      >
+      <View className="flex-row items-center p-3 rounded-xl" style={{ backgroundColor: typeInfo.bg }}>
         <Text className="text-2xl mr-3">{typeInfo.emoji}</Text>
         <View className="flex-1">
-          <Text className="font-semibold" style={{ color: colors.accent }}>
-            {typeInfo.label}
-          </Text>
+          <Text className="font-semibold" style={{ color: typeInfo.color }}>{typeInfo.label}</Text>
           {recognition.message && (
-            <Text className="text-foreground mt-1">{recognition.message}</Text>
+            <Text className="text-gray-700 mt-1">{recognition.message}</Text>
           )}
         </View>
       </View>
@@ -90,7 +72,7 @@ function NewRecognitionModal({
   onClose: () => void;
   onSubmit: (receiverId: number, type: Recognition["type"], message?: string) => void;
 }) {
-  const colors = useColors();
+  const insets = useSafeAreaInsets();
   const { user } = useAppAuth();
   const { allUsers } = useData();
   const [step, setStep] = useState<"user" | "type" | "message">("user");
@@ -130,12 +112,9 @@ function NewRecognitionModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 justify-end" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-        <View
-          className="rounded-t-3xl max-h-[85%]"
-          style={{ backgroundColor: colors.background }}
-        >
+        <View className="bg-white rounded-t-3xl max-h-[85%]">
           {/* Header */}
-          <View className="flex-row justify-between items-center p-4 border-b" style={{ borderColor: colors.border }}>
+          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
             <TouchableOpacity
               onPress={() => {
                 if (step === "type") setStep("user");
@@ -143,13 +122,13 @@ function NewRecognitionModal({
                 else handleClose();
               }}
             >
-              <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
+              <IconSymbol name="chevron.left" size={24} color="#1A1A2E" />
             </TouchableOpacity>
-            <Text className="text-xl font-bold text-foreground">
+            <Text className="text-xl font-bold text-gray-900">
               {step === "user" ? "Escolha quem reconhecer" : step === "type" ? "Tipo de reconhecimento" : "Adicionar mensagem"}
             </Text>
             <TouchableOpacity onPress={handleClose}>
-              <IconSymbol name="xmark" size={24} color={colors.muted} />
+              <IconSymbol name="xmark" size={24} color="#6B7280" />
             </TouchableOpacity>
           </View>
 
@@ -157,14 +136,16 @@ function NewRecognitionModal({
           {step === "user" && (
             <>
               <View className="px-4 py-2">
-                <TextInput
-                  className="px-4 py-3 rounded-xl"
-                  style={{ backgroundColor: colors.surface, color: colors.foreground }}
-                  placeholder="Buscar colaborador..."
-                  placeholderTextColor={colors.muted}
-                  value={search}
-                  onChangeText={setSearch}
-                />
+                <View className="flex-row items-center bg-gray-100 rounded-xl px-4">
+                  <IconSymbol name="magnifyingglass" size={20} color="#9CA3AF" />
+                  <TextInput
+                    className="flex-1 py-3 px-3 text-base text-gray-900"
+                    placeholder="Buscar colaborador..."
+                    placeholderTextColor="#9CA3AF"
+                    value={search}
+                    onChangeText={setSearch}
+                  />
+                </View>
               </View>
               <FlatList
                 data={filteredUsers}
@@ -178,15 +159,12 @@ function NewRecognitionModal({
                     }}
                     activeOpacity={0.7}
                   >
-                    <View
-                      className="w-10 h-10 rounded-full items-center justify-center"
-                      style={{ backgroundColor: colors.primary }}
-                    >
+                    <View className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: "#003FC3" }}>
                       <Text className="text-white font-bold">{item.name[0]}</Text>
                     </View>
                     <View className="ml-3">
-                      <Text className="font-medium text-foreground">{item.name}</Text>
-                      <Text className="text-sm text-muted">{item.unitName}</Text>
+                      <Text className="font-medium text-gray-900">{item.name}</Text>
+                      <Text className="text-sm text-gray-500">{item.unitName}</Text>
                     </View>
                   </TouchableOpacity>
                 )}
@@ -199,29 +177,26 @@ function NewRecognitionModal({
           {step === "type" && (
             <ScrollView className="p-4">
               {selectedUserData && (
-                <View className="flex-row items-center mb-4 p-3 rounded-xl" style={{ backgroundColor: colors.surface }}>
-                  <View
-                    className="w-10 h-10 rounded-full items-center justify-center"
-                    style={{ backgroundColor: colors.primary }}
-                  >
+                <View className="flex-row items-center mb-4 p-3 rounded-xl bg-gray-100">
+                  <View className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: "#003FC3" }}>
                     <Text className="text-white font-bold">{selectedUserData.name[0]}</Text>
                   </View>
                   <View className="ml-3">
-                    <Text className="font-medium text-foreground">{selectedUserData.name}</Text>
-                    <Text className="text-sm text-muted">{selectedUserData.unitName}</Text>
+                    <Text className="font-medium text-gray-900">{selectedUserData.name}</Text>
+                    <Text className="text-sm text-gray-500">{selectedUserData.unitName}</Text>
                   </View>
                 </View>
               )}
 
-              <Text className="text-sm font-medium text-muted mb-3">Escolha o tipo:</Text>
+              <Text className="text-sm font-medium text-gray-500 mb-3">Escolha o tipo:</Text>
 
               {RECOGNITION_TYPES.map((type) => (
                 <TouchableOpacity
                   key={type.value}
                   className="flex-row items-center p-4 mb-3 rounded-xl border"
                   style={{
-                    backgroundColor: selectedType === type.value ? `${colors.accent}15` : colors.surface,
-                    borderColor: selectedType === type.value ? colors.accent : colors.border,
+                    backgroundColor: selectedType === type.value ? type.bg : "#FFFFFF",
+                    borderColor: selectedType === type.value ? type.color : "#E5E7EB",
                   }}
                   onPress={() => {
                     setSelectedType(type.value);
@@ -231,10 +206,10 @@ function NewRecognitionModal({
                 >
                   <Text className="text-3xl mr-4">{type.emoji}</Text>
                   <View className="flex-1">
-                    <Text className="font-semibold text-foreground">{type.label}</Text>
-                    <Text className="text-sm text-muted">{type.description}</Text>
+                    <Text className="font-semibold text-gray-900">{type.label}</Text>
+                    <Text className="text-sm text-gray-500">{type.description}</Text>
                   </View>
-                  <IconSymbol name="chevron.right" size={20} color={colors.muted} />
+                  <IconSymbol name="chevron.right" size={20} color="#9CA3AF" />
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -244,37 +219,33 @@ function NewRecognitionModal({
           {step === "message" && (
             <View className="p-4">
               {selectedUserData && selectedType && (
-                <View className="flex-row items-center mb-4 p-3 rounded-xl" style={{ backgroundColor: colors.surface }}>
+                <View className="flex-row items-center mb-4 p-3 rounded-xl bg-gray-100">
                   <Text className="text-2xl mr-3">
                     {RECOGNITION_TYPES.find((t) => t.value === selectedType)?.emoji}
                   </Text>
                   <View className="flex-1">
-                    <Text className="font-medium text-foreground">
+                    <Text className="font-medium text-gray-900">
                       {RECOGNITION_TYPES.find((t) => t.value === selectedType)?.label} para {selectedUserData.name}
                     </Text>
-                    <Text className="text-sm text-muted">{selectedUserData.unitName}</Text>
+                    <Text className="text-sm text-gray-500">{selectedUserData.unitName}</Text>
                   </View>
                 </View>
               )}
 
-              <Text className="text-sm font-medium text-muted mb-2">Adicione uma mensagem (opcional):</Text>
+              <Text className="text-sm font-medium text-gray-500 mb-2">Adicione uma mensagem (opcional):</Text>
               <TextInput
-                className="rounded-xl p-4 text-base min-h-[100px]"
-                style={{
-                  backgroundColor: colors.surface,
-                  color: colors.foreground,
-                  textAlignVertical: "top",
-                }}
+                className="bg-gray-100 rounded-xl p-4 text-base text-gray-900 min-h-[100px]"
                 placeholder="Escreva algo especial..."
-                placeholderTextColor={colors.muted}
+                placeholderTextColor="#9CA3AF"
                 value={message}
                 onChangeText={setMessage}
                 multiline
+                style={{ textAlignVertical: "top" }}
               />
 
               <TouchableOpacity
                 className="rounded-xl py-4 items-center mt-4"
-                style={{ backgroundColor: colors.primary }}
+                style={{ backgroundColor: "#003FC3" }}
                 onPress={handleSubmit}
                 activeOpacity={0.8}
               >
@@ -289,15 +260,13 @@ function NewRecognitionModal({
 }
 
 export default function RecognitionScreen() {
-  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const { isAuthenticated, loading: authLoading } = useAppAuth();
   const { recognitions, sendRecognition } = useData();
   const [showNewRecognition, setShowNewRecognition] = useState(false);
 
-  const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
-  const isDesktop = width >= 1024;
-  const contentMaxWidth = isDesktop ? 800 : isTablet ? 600 : undefined;
+  const isLargeScreen = width >= 768;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -307,9 +276,9 @@ export default function RecognitionScreen() {
 
   if (authLoading) {
     return (
-      <ScreenContainer className="items-center justify-center">
-        <Text className="text-muted">Carregando...</Text>
-      </ScreenContainer>
+      <View className="flex-1 bg-gray-50 items-center justify-center">
+        <Text className="text-gray-400">Carregando...</Text>
+      </View>
     );
   }
 
@@ -318,49 +287,83 @@ export default function RecognitionScreen() {
   }
 
   return (
-    <ScreenContainer>
-      <View style={{ maxWidth: contentMaxWidth, alignSelf: contentMaxWidth ? 'center' : undefined, width: '100%', flex: 1 }}>
-      {/* Header */}
-      <View className="px-4 py-3 border-b" style={{ borderColor: colors.border }}>
-        <Text className="text-2xl font-bold text-foreground">Reconhecimento</Text>
-        <Text className="text-sm text-muted">Valorize seus colegas de trabalho</Text>
+    <View className="flex-1 bg-gray-50">
+      {/* Header Azul */}
+      <View style={{ backgroundColor: "#003FC3", paddingTop: insets.top }}>
+        <View className="flex-row items-center justify-between px-4 py-3">
+          <Image
+            source={require("@/assets/images/logo-grupo-one.png")}
+            style={{ width: 100, height: 36 }}
+            resizeMode="contain"
+          />
+          <TouchableOpacity className="relative p-2" activeOpacity={0.7}>
+            <IconSymbol name="bell.fill" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      {/* Recognition List */}
-      <FlatList
-        data={recognitions}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <RecognitionCard recognition={item} />}
-        contentContainerStyle={{ paddingTop: 16, paddingBottom: 100 }}
-        ListEmptyComponent={
-          <View className="items-center py-12 px-8">
-            <Text className="text-5xl mb-4">🌟</Text>
-            <Text className="text-foreground font-semibold text-lg text-center">
-              Seja o primeiro a reconhecer!
-            </Text>
-            <Text className="text-muted text-center mt-2">
-              Envie um reconhecimento para valorizar o trabalho de um colega.
-            </Text>
-          </View>
-        }
-      />
+      {/* Título */}
+      <View className="px-4 pt-4 pb-2">
+        <Text className="text-2xl font-bold text-gray-900">Reconhecimento</Text>
+        <Text className="text-sm text-gray-500">Valorize seus colegas de trabalho</Text>
+      </View>
 
-      {/* New Recognition Button */}
+      {/* Botões de Tipo */}
+      <View className="px-4 py-4">
+        <View className="flex-row justify-between">
+          {RECOGNITION_TYPES.map((type) => (
+            <TouchableOpacity
+              key={type.value}
+              className="flex-1 mx-1 p-4 rounded-xl items-center"
+              style={{ backgroundColor: type.bg }}
+              activeOpacity={0.7}
+              onPress={() => setShowNewRecognition(true)}
+            >
+              <Text className="text-3xl mb-2">{type.emoji}</Text>
+              <Text className="text-sm font-semibold" style={{ color: type.color }}>{type.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* Lista de Reconhecimentos */}
+      <View style={{ maxWidth: isLargeScreen ? 800 : undefined, alignSelf: "center", width: "100%", flex: 1 }}>
+        <Text className="text-base font-semibold text-gray-900 px-4 mb-3">Reconhecimentos Recentes</Text>
+        
+        <FlatList
+          data={recognitions}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => <RecognitionCard recognition={item} />}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          ListEmptyComponent={
+            <View className="bg-white mx-4 rounded-xl p-8 items-center border border-gray-100">
+              <Text className="text-5xl mb-4">🌟</Text>
+              <Text className="text-gray-900 font-semibold text-lg text-center">
+                Seja o primeiro a reconhecer!
+              </Text>
+              <Text className="text-gray-500 text-center mt-2">
+                Envie um reconhecimento para valorizar o trabalho de um colega.
+              </Text>
+            </View>
+          }
+        />
+      </View>
+
+      {/* Botão Flutuante */}
       <TouchableOpacity
-        className="absolute bottom-6 right-6 w-14 h-14 rounded-full items-center justify-center shadow-lg"
-        style={{ backgroundColor: colors.accent }}
+        className="absolute bottom-24 right-6 w-14 h-14 rounded-full items-center justify-center shadow-lg"
+        style={{ backgroundColor: "#003FC3" }}
         onPress={() => setShowNewRecognition(true)}
         activeOpacity={0.8}
       >
-        <IconSymbol name="star.fill" size={28} color="#FFFFFF" />
+        <IconSymbol name="plus" size={28} color="#FFFFFF" />
       </TouchableOpacity>
-      </View>
 
       <NewRecognitionModal
         visible={showNewRecognition}
         onClose={() => setShowNewRecognition(false)}
         onSubmit={sendRecognition}
       />
-    </ScreenContainer>
+    </View>
   );
 }

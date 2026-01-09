@@ -1,84 +1,10 @@
 import { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform, useWindowDimensions } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform, useWindowDimensions, ScrollView, Image } from "react-native";
 import { router } from "expo-router";
-import { ScreenContainer } from "@/components/screen-container";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppAuth } from "@/lib/auth-context";
 import { useData, Conversation, Message } from "@/lib/data-context";
-import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-
-function ConversationCard({
-  conversation,
-  onPress,
-}: {
-  conversation: Conversation;
-  onPress: () => void;
-}) {
-  const colors = useColors();
-
-  const formatTime = (date?: Date) => {
-    if (!date) return "";
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return "Agora";
-    if (minutes < 60) return `${minutes}min`;
-    if (hours < 24) return `${hours}h`;
-    return `${days}d`;
-  };
-
-  return (
-    <TouchableOpacity
-      className="flex-row items-center px-4 py-3 mx-4 mb-2 rounded-xl"
-      style={{ backgroundColor: colors.surface }}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View
-        className="w-12 h-12 rounded-full items-center justify-center"
-        style={{ backgroundColor: conversation.isGroup ? colors.accent : colors.primary }}
-      >
-        {conversation.isGroup ? (
-          <IconSymbol name="person.fill" size={20} color="#FFFFFF" />
-        ) : (
-          <Text className="text-white font-bold text-lg">
-            {conversation.name[0]}
-          </Text>
-        )}
-      </View>
-      <View className="flex-1 ml-3">
-        <View className="flex-row items-center justify-between">
-          <Text className="font-semibold text-foreground" numberOfLines={1}>
-            {conversation.name}
-          </Text>
-          {conversation.lastMessageTime && (
-            <Text className="text-xs text-muted">
-              {formatTime(conversation.lastMessageTime)}
-            </Text>
-          )}
-        </View>
-        {conversation.lastMessage && (
-          <Text className="text-sm text-muted mt-1" numberOfLines={1}>
-            {conversation.lastMessage}
-          </Text>
-        )}
-      </View>
-      {conversation.unreadCount > 0 && (
-        <View
-          className="w-5 h-5 rounded-full items-center justify-center ml-2"
-          style={{ backgroundColor: colors.primary }}
-        >
-          <Text className="text-white text-xs font-bold">
-            {conversation.unreadCount}
-          </Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
-}
 
 function ChatModal({
   visible,
@@ -89,7 +15,7 @@ function ChatModal({
   conversation: Conversation | null;
   onClose: () => void;
 }) {
-  const colors = useColors();
+  const insets = useSafeAreaInsets();
   const { user } = useAppAuth();
   const { getMessages, sendMessage } = useData();
   const [message, setMessage] = useState("");
@@ -107,24 +33,20 @@ function ChatModal({
 
   return (
     <Modal visible={visible} animationType="slide">
-      <ScreenContainer edges={["top", "bottom", "left", "right"]}>
+      <View className="flex-1 bg-gray-50">
         {/* Header */}
-        <View
-          className="flex-row items-center px-4 py-3 border-b"
-          style={{ borderColor: colors.border }}
-        >
-          <TouchableOpacity onPress={onClose} className="mr-3">
-            <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
-          </TouchableOpacity>
-          <View
-            className="w-10 h-10 rounded-full items-center justify-center"
-            style={{ backgroundColor: colors.primary }}
-          >
-            <Text className="text-white font-bold">{conversation.name[0]}</Text>
+        <View style={{ backgroundColor: "#003FC3", paddingTop: insets.top }}>
+          <View className="flex-row items-center px-4 py-3">
+            <TouchableOpacity onPress={onClose} className="mr-3 p-1">
+              <IconSymbol name="chevron.left" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+            <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center">
+              <Text className="text-white font-bold">{conversation.name[0]}</Text>
+            </View>
+            <Text className="flex-1 ml-3 font-semibold text-white text-lg">
+              {conversation.name}
+            </Text>
           </View>
-          <Text className="flex-1 ml-3 font-semibold text-foreground text-lg">
-            {conversation.name}
-          </Text>
         </View>
 
         {/* Messages */}
@@ -134,21 +56,17 @@ function ChatModal({
           renderItem={({ item }) => {
             const isMe = item.senderId === user?.id;
             return (
-              <View
-                className={`mx-4 my-1 max-w-[80%] ${isMe ? "self-end" : "self-start"}`}
-              >
+              <View className={`mx-4 my-1 max-w-[80%] ${isMe ? "self-end" : "self-start"}`}>
                 <View
                   className="px-4 py-2 rounded-2xl"
-                  style={{
-                    backgroundColor: isMe ? colors.primary : colors.surface,
-                  }}
+                  style={{ backgroundColor: isMe ? "#003FC3" : "#FFFFFF" }}
                 >
                   {!isMe && (
-                    <Text className="text-xs font-medium mb-1" style={{ color: colors.accent }}>
+                    <Text className="text-xs font-medium mb-1" style={{ color: "#003FC3" }}>
                       {item.senderName}
                     </Text>
                   )}
-                  <Text style={{ color: isMe ? "#FFFFFF" : colors.foreground }}>
+                  <Text style={{ color: isMe ? "#FFFFFF" : "#1A1A2E" }}>
                     {item.content}
                   </Text>
                 </View>
@@ -159,29 +77,20 @@ function ChatModal({
           inverted={false}
           ListEmptyComponent={
             <View className="items-center py-12">
-              <IconSymbol name="message.fill" size={48} color={colors.muted} />
-              <Text className="text-muted mt-4">Nenhuma mensagem ainda</Text>
-              <Text className="text-muted text-sm">Comece a conversa!</Text>
+              <IconSymbol name="message.fill" size={48} color="#D1D5DB" />
+              <Text className="text-gray-400 mt-4">Nenhuma mensagem ainda</Text>
+              <Text className="text-gray-400 text-sm">Comece a conversa!</Text>
             </View>
           }
         />
 
         {/* Input */}
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
-          <View
-            className="flex-row items-center px-4 py-3 border-t"
-            style={{ borderColor: colors.border }}
-          >
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
+          <View className="flex-row items-center px-4 py-3 bg-white border-t border-gray-200">
             <TextInput
-              className="flex-1 px-4 py-3 rounded-full mr-2"
-              style={{
-                backgroundColor: colors.surface,
-                color: colors.foreground,
-              }}
+              className="flex-1 px-4 py-3 rounded-full mr-2 bg-gray-100 text-gray-900"
               placeholder="Digite sua mensagem..."
-              placeholderTextColor={colors.muted}
+              placeholderTextColor="#9CA3AF"
               value={message}
               onChangeText={setMessage}
               returnKeyType="send"
@@ -189,9 +98,7 @@ function ChatModal({
             />
             <TouchableOpacity
               className="w-10 h-10 rounded-full items-center justify-center"
-              style={{
-                backgroundColor: message.trim() ? colors.primary : colors.muted,
-              }}
+              style={{ backgroundColor: message.trim() ? "#003FC3" : "#D1D5DB" }}
               onPress={handleSend}
               disabled={!message.trim()}
             >
@@ -199,7 +106,7 @@ function ChatModal({
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
-      </ScreenContainer>
+      </View>
     </Modal>
   );
 }
@@ -213,7 +120,7 @@ function NewChatModal({
   onClose: () => void;
   onSelectUser: (userId: number) => void;
 }) {
-  const colors = useColors();
+  const insets = useSafeAreaInsets();
   const { user } = useAppAuth();
   const { allUsers } = useData();
   const [search, setSearch] = useState("");
@@ -228,26 +135,25 @@ function NewChatModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View className="flex-1 justify-end" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-        <View
-          className="rounded-t-3xl max-h-[80%]"
-          style={{ backgroundColor: colors.background }}
-        >
-          <View className="flex-row justify-between items-center p-4 border-b" style={{ borderColor: colors.border }}>
-            <Text className="text-xl font-bold text-foreground">Nova Conversa</Text>
+        <View className="bg-white rounded-t-3xl max-h-[80%]">
+          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
+            <Text className="text-xl font-bold text-gray-900">Nova Conversa</Text>
             <TouchableOpacity onPress={onClose}>
-              <IconSymbol name="xmark" size={24} color={colors.muted} />
+              <IconSymbol name="xmark" size={24} color="#6B7280" />
             </TouchableOpacity>
           </View>
 
           <View className="px-4 py-2">
-            <TextInput
-              className="px-4 py-3 rounded-xl"
-              style={{ backgroundColor: colors.surface, color: colors.foreground }}
-              placeholder="Buscar colaborador..."
-              placeholderTextColor={colors.muted}
-              value={search}
-              onChangeText={setSearch}
-            />
+            <View className="flex-row items-center bg-gray-100 rounded-xl px-4">
+              <IconSymbol name="magnifyingglass" size={20} color="#9CA3AF" />
+              <TextInput
+                className="flex-1 py-3 px-3 text-base text-gray-900"
+                placeholder="Buscar colaborador..."
+                placeholderTextColor="#9CA3AF"
+                value={search}
+                onChangeText={setSearch}
+              />
+            </View>
           </View>
 
           <FlatList
@@ -262,15 +168,12 @@ function NewChatModal({
                 }}
                 activeOpacity={0.7}
               >
-                <View
-                  className="w-10 h-10 rounded-full items-center justify-center"
-                  style={{ backgroundColor: colors.primary }}
-                >
+                <View className="w-10 h-10 rounded-full items-center justify-center" style={{ backgroundColor: "#003FC3" }}>
                   <Text className="text-white font-bold">{item.name[0]}</Text>
                 </View>
                 <View className="ml-3">
-                  <Text className="font-medium text-foreground">{item.name}</Text>
-                  <Text className="text-sm text-muted">
+                  <Text className="font-medium text-gray-900">{item.name}</Text>
+                  <Text className="text-sm text-gray-500">
                     {item.appRole === "socio" ? "Sócio(a)" : item.appRole === "gerente" ? "Gerente" : "Consultora"} • {item.unitName}
                   </Text>
                 </View>
@@ -285,16 +188,24 @@ function NewChatModal({
 }
 
 export default function ChatScreen() {
-  const colors = useColors();
-  const { isAuthenticated, loading: authLoading } = useAppAuth();
-  const { conversations, startConversation } = useData();
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const { isAuthenticated, loading: authLoading, user } = useAppAuth();
+  const { conversations, startConversation, allUsers } = useData();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [showNewChat, setShowNewChat] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
-  const isDesktop = width >= 1024;
-  const contentMaxWidth = isDesktop ? 800 : isTablet ? 600 : undefined;
+  const isLargeScreen = width >= 768;
+
+  // Aniversariantes de exemplo
+  const birthdays = [
+    { name: "Valmir Pinto", date: "19/09", avatarUrl: null, isToday: true },
+    { name: "Amanda Machado", date: "20/09", avatarUrl: null, isToday: false },
+    { name: "Lucas Mendes", date: "27/09", avatarUrl: null, isToday: false },
+    { name: "Carlos Andrade", date: "27/09", avatarUrl: null, isToday: false },
+    { name: "Jéssica Flores", date: "29/09", avatarUrl: null, isToday: false },
+  ];
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -310,11 +221,15 @@ export default function ChatScreen() {
     }
   };
 
+  const filteredConversations = searchQuery
+    ? conversations.filter((c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : conversations;
+
   if (authLoading) {
     return (
-      <ScreenContainer className="items-center justify-center">
-        <Text className="text-muted">Carregando...</Text>
-      </ScreenContainer>
+      <View className="flex-1 bg-gray-50 items-center justify-center">
+        <Text className="text-gray-400">Carregando...</Text>
+      </View>
     );
   }
 
@@ -323,44 +238,161 @@ export default function ChatScreen() {
   }
 
   return (
-    <ScreenContainer>
-      <View style={{ maxWidth: contentMaxWidth, alignSelf: contentMaxWidth ? 'center' : undefined, width: '100%', flex: 1 }}>
-      {/* Header */}
-      <View className="px-4 py-3 border-b" style={{ borderColor: colors.border }}>
-        <Text className="text-2xl font-bold text-foreground">Chat</Text>
-        <Text className="text-sm text-muted">Converse com toda a equipe</Text>
-      </View>
-
-      {/* Conversations List */}
-      <FlatList
-        data={conversations}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <ConversationCard
-            conversation={item}
-            onPress={() => setSelectedConversation(item)}
+    <View className="flex-1 bg-gray-50">
+      {/* Header Azul */}
+      <View style={{ backgroundColor: "#003FC3", paddingTop: insets.top }}>
+        <View className="flex-row items-center justify-between px-4 py-3">
+          <Image
+            source={require("@/assets/images/logo-grupo-one.png")}
+            style={{ width: 100, height: 36 }}
+            resizeMode="contain"
           />
-        )}
-        contentContainerStyle={{ paddingTop: 16, paddingBottom: 100 }}
-        ListEmptyComponent={
-          <View className="items-center py-12">
-            <IconSymbol name="message.fill" size={48} color={colors.muted} />
-            <Text className="text-muted mt-4">Nenhuma conversa ainda</Text>
-            <Text className="text-muted text-sm">Inicie uma nova conversa!</Text>
-          </View>
-        }
-      />
-
-      {/* New Chat Button */}
-      <TouchableOpacity
-        className="absolute bottom-6 right-6 w-14 h-14 rounded-full items-center justify-center shadow-lg"
-        style={{ backgroundColor: colors.accent }}
-        onPress={() => setShowNewChat(true)}
-        activeOpacity={0.8}
-      >
-        <IconSymbol name="plus" size={28} color="#FFFFFF" />
-      </TouchableOpacity>
+          <TouchableOpacity className="relative p-2" activeOpacity={0.7}>
+            <IconSymbol name="bell.fill" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
       </View>
+
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={{ maxWidth: isLargeScreen ? 800 : undefined, alignSelf: "center", width: "100%" }}>
+          
+          {/* Seção de Aniversariantes */}
+          <View className="py-4">
+            <Text className="text-base font-semibold text-gray-900 px-4 mb-3">Aniversariantes</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 16 }}
+            >
+              {birthdays.map((person, index) => (
+                <View key={index} className="items-center mr-4" style={{ width: 70 }}>
+                  <View
+                    className="w-14 h-14 rounded-full items-center justify-center mb-1"
+                    style={{
+                      backgroundColor: person.isToday ? "#003FC3" : "#E5E7EB",
+                      borderWidth: person.isToday ? 3 : 0,
+                      borderColor: "#003FC3",
+                    }}
+                  >
+                    <Text
+                      className="text-lg font-bold"
+                      style={{ color: person.isToday ? "#FFFFFF" : "#6B7280" }}
+                    >
+                      {person.name.charAt(0)}
+                    </Text>
+                  </View>
+                  <Text className="text-xs text-gray-900 text-center" numberOfLines={1}>
+                    {person.name.split(" ")[0]}
+                  </Text>
+                  <Text
+                    className="text-xs"
+                    style={{ color: person.isToday ? "#003FC3" : "#6B7280", fontWeight: person.isToday ? "600" : "400" }}
+                  >
+                    {person.date}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* Título Mensagens */}
+          <View className="flex-row items-center justify-between px-4 mb-3">
+            <Text className="text-base font-semibold text-gray-900">Mensagens</Text>
+            <TouchableOpacity
+              className="w-8 h-8 rounded-full items-center justify-center"
+              style={{ backgroundColor: "#003FC3" }}
+              onPress={() => setShowNewChat(true)}
+              activeOpacity={0.7}
+            >
+              <IconSymbol name="plus" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Barra de Busca */}
+          <View className="px-4 mb-4">
+            <View className="flex-row items-center bg-white rounded-xl px-4 border border-gray-200">
+              <IconSymbol name="magnifyingglass" size={20} color="#9CA3AF" />
+              <TextInput
+                className="flex-1 py-3 px-3 text-base text-gray-900"
+                placeholder="Quem você está procurando?"
+                placeholderTextColor="#9CA3AF"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              <TouchableOpacity
+                className="w-10 h-10 rounded-xl items-center justify-center -mr-2"
+                style={{ backgroundColor: "#003FC3" }}
+                activeOpacity={0.7}
+              >
+                <IconSymbol name="magnifyingglass" size={18} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Lista de Conversas */}
+          <View className="bg-white mx-4 rounded-xl overflow-hidden border border-gray-100">
+            {filteredConversations.length === 0 ? (
+              <View className="items-center py-8">
+                <IconSymbol name="message.fill" size={48} color="#D1D5DB" />
+                <Text className="text-gray-400 mt-2">Nenhuma conversa ainda</Text>
+                <TouchableOpacity
+                  className="mt-4 px-6 py-2 rounded-full"
+                  style={{ backgroundColor: "#003FC3" }}
+                  onPress={() => setShowNewChat(true)}
+                >
+                  <Text className="text-white font-medium">Iniciar conversa</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              filteredConversations.map((conversation, index) => (
+                <TouchableOpacity
+                  key={conversation.id}
+                  className="flex-row items-center p-4"
+                  style={{
+                    borderBottomWidth: index < filteredConversations.length - 1 ? 1 : 0,
+                    borderBottomColor: "#F3F4F6",
+                  }}
+                  onPress={() => setSelectedConversation(conversation)}
+                  activeOpacity={0.7}
+                >
+                  {/* Avatar */}
+                  <View className="w-12 h-12 rounded-full items-center justify-center mr-3" style={{ backgroundColor: "#003FC3" }}>
+                    <Text className="text-lg font-bold text-white">{conversation.name.charAt(0)}</Text>
+                  </View>
+
+                  {/* Conteúdo */}
+                  <View className="flex-1">
+                    <View className="flex-row items-center justify-between mb-1">
+                      <Text className="font-semibold text-gray-900">{conversation.name}</Text>
+                      {conversation.lastMessageTime && (
+                        <Text className="text-xs text-gray-400">
+                          {new Date(conversation.lastMessageTime).toLocaleDateString("pt-BR")}
+                        </Text>
+                      )}
+                    </View>
+                    {conversation.lastMessage && (
+                      <Text className="text-sm text-gray-500" numberOfLines={1}>
+                        {conversation.lastMessage}
+                      </Text>
+                    )}
+                  </View>
+
+                  {/* Badge de não lidas */}
+                  {conversation.unreadCount > 0 && (
+                    <View className="w-5 h-5 rounded-full items-center justify-center ml-2" style={{ backgroundColor: "#003FC3" }}>
+                      <Text className="text-white text-xs font-bold">{conversation.unreadCount}</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              ))
+            )}
+          </View>
+        </View>
+      </ScrollView>
 
       <ChatModal
         visible={!!selectedConversation}
@@ -373,6 +405,6 @@ export default function ChatScreen() {
         onClose={() => setShowNewChat(false)}
         onSelectUser={handleNewChat}
       />
-    </ScreenContainer>
+    </View>
   );
 }

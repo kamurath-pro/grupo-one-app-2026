@@ -5,39 +5,46 @@ import { View, Text } from "react-native";
 import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Platform } from "react-native";
-import { useColors } from "@/hooks/use-colors";
 import { useAppAuth } from "@/lib/auth-context";
 
 export default function TabLayout() {
-  const colors = useColors();
-  const { user, isAdmin, pendingUsers } = useAppAuth();
+  const { isAdmin, pendingUsers } = useAppAuth();
   const insets = useSafeAreaInsets();
   const bottomPadding = Platform.OS === "web" ? 12 : Math.max(insets.bottom, 8);
-  const tabBarHeight = 56 + bottomPadding;
+  const tabBarHeight = 60 + bottomPadding;
 
   const pendingCount = pendingUsers.length;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.muted,
+        tabBarActiveTintColor: "#003FC3",
+        tabBarInactiveTintColor: "#9CA3AF",
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
           paddingTop: 8,
           paddingBottom: bottomPadding,
           height: tabBarHeight,
-          backgroundColor: colors.background,
-          borderTopColor: colors.border,
-          borderTopWidth: 0.5,
+          backgroundColor: "#FFFFFF",
+          borderTopColor: "#E5E7EB",
+          borderTopWidth: 1,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 4,
+          elevation: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "500",
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Feed",
+          title: "Home",
           tabBarIcon: ({ color }) => <IconSymbol size={26} name="house.fill" color={color} />,
         }}
       />
@@ -66,17 +73,17 @@ export default function TabLayout() {
         <Tabs.Screen
           name="admin"
           options={{
-            title: "Aprovações",
+            title: "Admin",
             tabBarIcon: ({ color }) => (
               <View>
-                <IconSymbol size={26} name="checkmark" color={color} />
+                <IconSymbol size={26} name="shield.fill" color={color} />
                 {pendingCount > 0 && (
                   <View
                     style={{
                       position: "absolute",
                       top: -4,
                       right: -8,
-                      backgroundColor: colors.error,
+                      backgroundColor: "#EF4444",
                       borderRadius: 10,
                       minWidth: 18,
                       height: 18,

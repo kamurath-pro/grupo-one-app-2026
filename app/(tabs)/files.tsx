@@ -1,69 +1,34 @@
 import { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, RefreshControl, useWindowDimensions } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, useWindowDimensions, Linking, Image } from "react-native";
 import { router } from "expo-router";
-import { ScreenContainer } from "@/components/screen-container";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppAuth } from "@/lib/auth-context";
 import { useData, FileItem } from "@/lib/data-context";
-import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 
-function FileItemCard({ item, onPress }: { item: FileItem; onPress: () => void }) {
-  const colors = useColors();
-
-  const getIcon = () => {
-    if (item.isFolder) return "folder.fill";
-    if (item.mimeType?.includes("pdf")) return "doc.fill";
-    if (item.mimeType?.includes("image")) return "photo.fill";
-    return "doc.fill";
-  };
-
-  const getIconColor = () => {
-    if (item.isFolder) return colors.accent;
-    if (item.mimeType?.includes("pdf")) return colors.error;
-    return colors.primary;
-  };
-
-  return (
-    <TouchableOpacity
-      className="flex-row items-center px-4 py-3 mx-4 mb-2 rounded-xl"
-      style={{ backgroundColor: colors.surface }}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <View
-        className="w-10 h-10 rounded-lg items-center justify-center"
-        style={{ backgroundColor: `${getIconColor()}20` }}
-      >
-        <IconSymbol name={getIcon()} size={22} color={getIconColor()} />
-      </View>
-      <View className="flex-1 ml-3">
-        <Text className="font-medium text-foreground" numberOfLines={1}>
-          {item.name}
-        </Text>
-        {item.accessLevel === "socio" && (
-          <View className="flex-row items-center mt-1">
-            <IconSymbol name="lock.fill" size={12} color={colors.warning} />
-            <Text className="text-xs ml-1" style={{ color: colors.warning }}>
-              Restrito a sócios
-            </Text>
-          </View>
-        )}
-      </View>
-      {item.isFolder && (
-        <IconSymbol name="chevron.right" size={20} color={colors.muted} />
-      )}
-    </TouchableOpacity>
-  );
+// Tipos de arquivos/pastas
+interface FileFolderItem {
+  id: string;
+  name: string;
+  type: "folder" | "file" | "link";
+  icon: string;
+  iconColor: string;
+  iconBg: string;
+  description?: string;
+  url?: string;
+  children?: FileFolderItem[];
 }
 
 export default function FilesScreen() {
-  const colors = useColors();
-  const { user, isAuthenticated, loading: authLoading } = useAppAuth();
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const { user, isSocio, isAuthenticated, loading: authLoading, getUserUnitAccess } = useAppAuth();
   const { getFilesForUser } = useData();
-  const [currentPath, setCurrentPath] = useState<{ id: number | null; name: string }[]>([
-    { id: null, name: "Arquivos" },
-  ]);
-  const [refreshing, setRefreshing] = useState(false);
+
+  const [currentPath, setCurrentPath] = useState<string[]>([]);
+  const [currentFolder, setCurrentFolder] = useState<FileFolderItem | null>(null);
+
+  const isLargeScreen = width >= 768;
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -71,47 +36,155 @@ export default function FilesScreen() {
     }
   }, [authLoading, isAuthenticated]);
 
-  const currentFolderId = currentPath[currentPath.length - 1].id;
-  const files = getFilesForUser(currentFolderId);
+  // Estrutura de arquivos baseada no tipo de usuário
+  const getFilesStructure = (): FileFolderItem[] => {
+    const unitAccess = getUserUnitAccess();
+    
+    if (isSocio && unitAccess.length > 0) {
+      // Sócios veem links do Drive por unidade
+      return unitAccess.map((access) => ({
+        id: access.unitName.toLowerCase().replace(/\s/g, "-"),
+        name: access.unitName,
+        type: "folder" as const,
+        icon: "building.2.fill",
+        iconColor: "#003FC3",
+        iconBg: "#E6F0FF",
+        description: `Documentos de ${access.unitName}`,
+        children: [
+          {
+            id: `${access.unitName}-relatorios`,
+            name: "Relatórios Mensais",
+            type: "link" as const,
+            icon: "chart.bar.fill",
+            iconColor: "#22C55E",
+            iconBg: "#DCFCE7",
+            description: "Relatórios de desempenho mensal",
+            url: access.relatoriosMensais,
+          },
+          {
+            id: `${access.unitName}-notas`,
+            name: "Notas Fiscais",
+            type: "link" as const,
+            icon: "doc.text.fill",
+            iconColor: "#FF9012",
+            iconBg: "#FFF3E0",
+            description: "Notas fiscais e documentos fiscais",
+            url: access.notasFiscais,
+          },
+          {
+            id: `${access.unitName}-dados`,
+            name: "Fonte de Dados",
+            type: "link" as const,
+            icon: "link",
+            iconColor: "#DF007E",
+            iconBg: "#FCE4EC",
+            description: "Planilha de dados em tempo real",
+            url: access.fonteDados,
+          },
+        ],
+      }));
+    }
 
-  const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
-  const isDesktop = width >= 1024;
-  const contentMaxWidth = isDesktop ? 900 : isTablet ? 700 : undefined;
-
-  const navigateToFolder = (folder: FileItem) => {
-    setCurrentPath([...currentPath, { id: folder.id, name: folder.name }]);
+    // Colaboradores veem estrutura padrão
+    return [
+      {
+        id: "comunicados",
+        name: "Comunicados",
+        type: "folder",
+        icon: "megaphone.fill",
+        iconColor: "#003FC3",
+        iconBg: "#E6F0FF",
+        description: "Comunicados oficiais",
+        children: [],
+      },
+      {
+        id: "treinamentos",
+        name: "Treinamentos",
+        type: "folder",
+        icon: "doc.text.fill",
+        iconColor: "#22C55E",
+        iconBg: "#DCFCE7",
+        description: "Materiais de treinamento",
+        children: [],
+      },
+      {
+        id: "marketing",
+        name: "Marketing",
+        type: "folder",
+        icon: "photo.fill",
+        iconColor: "#FF9012",
+        iconBg: "#FFF3E0",
+        description: "Materiais de marketing",
+        children: [],
+      },
+      {
+        id: "procedimentos",
+        name: "Procedimentos",
+        type: "folder",
+        icon: "doc.fill",
+        iconColor: "#DF007E",
+        iconBg: "#FCE4EC",
+        description: "Procedimentos operacionais",
+        children: [],
+      },
+    ];
   };
 
-  const navigateBack = () => {
-    if (currentPath.length > 1) {
-      setCurrentPath(currentPath.slice(0, -1));
+  const filesStructure = getFilesStructure();
+
+  const getCurrentItems = (): FileFolderItem[] => {
+    if (currentPath.length === 0) {
+      return filesStructure;
+    }
+
+    let current: FileFolderItem[] = filesStructure;
+    for (const pathId of currentPath) {
+      const folder = current.find((f) => f.id === pathId);
+      if (folder?.children) {
+        current = folder.children;
+      }
+    }
+    return current;
+  };
+
+  const handleItemPress = (item: FileFolderItem) => {
+    if (item.type === "folder" && item.children && item.children.length > 0) {
+      setCurrentPath([...currentPath, item.id]);
+      setCurrentFolder(item);
+    } else if (item.type === "link" && item.url) {
+      Linking.openURL(item.url);
     }
   };
 
-  const navigateToPathIndex = (index: number) => {
-    setCurrentPath(currentPath.slice(0, index + 1));
-  };
-
-  const handleFilePress = (item: FileItem) => {
-    if (item.isFolder) {
-      navigateToFolder(item);
-    } else {
-      // In a real app, this would open the file or download it
-      // For demo, we just show an alert
+  const handleBack = () => {
+    if (currentPath.length > 0) {
+      const newPath = currentPath.slice(0, -1);
+      setCurrentPath(newPath);
+      
+      if (newPath.length === 0) {
+        setCurrentFolder(null);
+      } else {
+        let current: FileFolderItem[] = filesStructure;
+        let folder: FileFolderItem | null = null;
+        for (const pathId of newPath) {
+          folder = current.find((f) => f.id === pathId) || null;
+          if (folder?.children) {
+            current = folder.children;
+          }
+        }
+        setCurrentFolder(folder);
+      }
     }
   };
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
-  };
+  const currentItems = getCurrentItems();
+  const pageTitle = currentFolder?.name || "Arquivos";
 
   if (authLoading) {
     return (
-      <ScreenContainer className="items-center justify-center">
-        <Text className="text-muted">Carregando...</Text>
-      </ScreenContainer>
+      <View className="flex-1 bg-gray-50 items-center justify-center">
+        <Text className="text-gray-400">Carregando...</Text>
+      </View>
     );
   }
 
@@ -120,86 +193,118 @@ export default function FilesScreen() {
   }
 
   return (
-    <ScreenContainer>
-      <View style={{ maxWidth: contentMaxWidth, alignSelf: contentMaxWidth ? 'center' : undefined, width: '100%', flex: 1 }}>
-      {/* Header */}
-      <View className="px-4 py-3 border-b" style={{ borderColor: colors.border }}>
-        <Text className="text-2xl font-bold text-foreground">Arquivos</Text>
-        <Text className="text-sm text-muted">{user?.unitNames?.[0] || "Grupo ONE"}</Text>
-      </View>
-
-      {/* Breadcrumb */}
-      <View className="flex-row items-center px-4 py-2 flex-wrap" style={{ backgroundColor: colors.surface }}>
-        {currentPath.map((item, index) => (
-          <View key={index} className="flex-row items-center">
-            {index > 0 && (
-              <IconSymbol name="chevron.right" size={14} color={colors.muted} style={{ marginHorizontal: 4 }} />
-            )}
-            <TouchableOpacity
-              onPress={() => navigateToPathIndex(index)}
-              disabled={index === currentPath.length - 1}
-            >
-              <Text
-                className={`text-sm ${index === currentPath.length - 1 ? "font-semibold" : ""}`}
-                style={{ color: index === currentPath.length - 1 ? colors.foreground : colors.primary }}
-              >
-                {item.name}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
-
-      {/* Back Button */}
-      {currentPath.length > 1 && (
-        <TouchableOpacity
-          className="flex-row items-center px-4 py-3"
-          onPress={navigateBack}
-          activeOpacity={0.7}
-        >
-          <IconSymbol name="arrow.left" size={20} color={colors.primary} />
-          <Text className="ml-2 font-medium" style={{ color: colors.primary }}>
-            Voltar
-          </Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Files List */}
-      <FlatList
-        data={files}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <FileItemCard item={item} onPress={() => handleFilePress(item)} />
-        )}
-        contentContainerStyle={{ paddingTop: 8, paddingBottom: 100 }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
-        }
-        ListEmptyComponent={
-          <View className="items-center py-12">
-            <IconSymbol name="folder.fill" size={48} color={colors.muted} />
-            <Text className="text-muted mt-4 text-center px-8">
-              {currentPath.length === 1
-                ? "Nenhum arquivo disponível para sua unidade"
-                : "Esta pasta está vazia"}
-            </Text>
-          </View>
-        }
-      />
-
-      {/* Info Banner */}
-      {user?.appRole !== "socio" && (
-        <View
-          className="mx-4 mb-4 p-3 rounded-xl flex-row items-center"
-          style={{ backgroundColor: `${colors.warning}20` }}
-        >
-          <IconSymbol name="info.circle.fill" size={20} color={colors.warning} />
-          <Text className="flex-1 ml-2 text-sm" style={{ color: colors.warning }}>
-            Alguns arquivos são restritos a sócios
-          </Text>
+    <View className="flex-1 bg-gray-50">
+      {/* Header Azul */}
+      <View style={{ backgroundColor: "#003FC3", paddingTop: insets.top }}>
+        <View className="flex-row items-center px-4 py-3">
+          {currentPath.length > 0 ? (
+            <>
+              <TouchableOpacity onPress={handleBack} className="mr-3 p-1">
+                <IconSymbol name="chevron.left" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+              <Text className="text-white text-lg font-semibold">{pageTitle}</Text>
+            </>
+          ) : (
+            <>
+              <Image
+                source={require("@/assets/images/logo-grupo-one.png")}
+                style={{ width: 100, height: 36 }}
+                resizeMode="contain"
+              />
+              <View className="flex-1" />
+              <TouchableOpacity className="relative p-2" activeOpacity={0.7}>
+                <IconSymbol name="bell.fill" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </>
+          )}
         </View>
-      )}
       </View>
-    </ScreenContainer>
+
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={{ maxWidth: isLargeScreen ? 800 : undefined, alignSelf: "center", width: "100%" }}>
+          
+          {/* Breadcrumb / Título */}
+          {currentPath.length === 0 && (
+            <View className="px-4 pt-4 pb-2">
+              <Text className="text-2xl font-bold text-gray-900">Arquivos</Text>
+              <Text className="text-sm text-gray-500">
+                {isSocio ? "Acesse os documentos das suas unidades" : `Documentos de ${user?.unitNames?.[0] || "sua unidade"}`}
+              </Text>
+            </View>
+          )}
+
+          {/* Grid de Arquivos/Pastas */}
+          <View className="px-4 py-4">
+            {currentItems.length === 0 ? (
+              <View className="bg-white rounded-xl p-8 items-center border border-gray-100">
+                <IconSymbol name="folder.fill" size={48} color="#D1D5DB" />
+                <Text className="text-gray-400 mt-4">Pasta vazia</Text>
+                <Text className="text-gray-400 text-sm">Nenhum arquivo disponível</Text>
+              </View>
+            ) : (
+              <View className="flex-row flex-wrap" style={{ marginHorizontal: -6 }}>
+                {currentItems.map((item) => (
+                  <View key={item.id} style={{ width: "50%", paddingHorizontal: 6, marginBottom: 12 }}>
+                    <TouchableOpacity
+                      className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+                      style={{ minHeight: 120 }}
+                      activeOpacity={0.7}
+                      onPress={() => handleItemPress(item)}
+                    >
+                      <View className="flex-row items-start justify-between mb-3">
+                        <View
+                          className="w-10 h-10 rounded-lg items-center justify-center"
+                          style={{ backgroundColor: item.iconBg }}
+                        >
+                          <IconSymbol name={item.icon as any} size={20} color={item.iconColor} />
+                        </View>
+                        {item.type === "link" ? (
+                          <IconSymbol name="link" size={16} color="#003FC3" />
+                        ) : (
+                          <IconSymbol name="chevron.right" size={16} color="#003FC3" />
+                        )}
+                      </View>
+                      <Text className="text-sm font-semibold text-gray-900 mb-1">{item.name}</Text>
+                      {item.description && (
+                        <Text className="text-xs text-gray-500" numberOfLines={2}>{item.description}</Text>
+                      )}
+                      {item.type === "link" && (
+                        <View className="flex-row items-center mt-2">
+                          <View className="px-2 py-1 rounded-full" style={{ backgroundColor: "#E6F0FF" }}>
+                            <Text className="text-xs" style={{ color: "#003FC3" }}>Abrir no Drive</Text>
+                          </View>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {/* Info para colaboradores */}
+          {!isSocio && currentPath.length === 0 && (
+            <View className="mx-4 p-4 rounded-xl" style={{ backgroundColor: "#E6F0FF" }}>
+              <View className="flex-row items-start">
+                <IconSymbol name="info.circle.fill" size={20} color="#003FC3" />
+                <View className="flex-1 ml-3">
+                  <Text className="text-sm font-medium" style={{ color: "#003FC3" }}>
+                    Arquivos da sua unidade
+                  </Text>
+                  <Text className="text-xs text-gray-600 mt-1">
+                    Você tem acesso aos documentos de {user?.unitNames?.[0] || "sua unidade"}. 
+                    Para solicitar acesso a outros materiais, fale com sua gerente.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
