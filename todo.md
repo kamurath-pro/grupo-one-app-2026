@@ -82,3 +82,8 @@
 - [x] Barra azul com 4 logos fixa abaixo do tab bar (não scrollável)
 - [x] Rodapé estático igual ao exemplo visual
 - [x] Foto de perfil da Lia salva como exemplo
+
+## Correção v3.2 - Logos nas Telas de Login/Cadastro
+- [x] Logo Grupo ONE branca no header azul das telas de login e cadastro
+- [x] Rodapé "Desenvolvido por" + logo TráfegON azul
+- [x] Copiar logos corretas para assets

@@ -150,12 +150,12 @@ export default function LoginScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      {/* Header Azul */}
+      {/* Header Azul com Logo Grupo ONE Branca */}
       <View style={{ backgroundColor: "#003FC3", paddingTop: insets.top }}>
         <View className="items-center py-6">
           <Image
-            source={require("@/assets/images/logo-grupo-one.png")}
-            style={{ width: 140, height: 50 }}
+            source={require("@/assets/images/logos/grupoone-branca-header.png")}
+            style={{ width: 120, height: 45 }}
             resizeMode="contain"
           />
         </View>
@@ -488,12 +488,12 @@ export default function LoginScreen() {
               </>
             )}
 
-            {/* Footer */}
+            {/* Footer - Desenvolvido por TráfegON */}
             <View className="items-center mt-8 pt-4">
               <Text className="text-xs text-gray-400 mb-2">Desenvolvido por</Text>
               <Image
-                source={require("@/assets/images/logo-trafegon.png")}
-                style={{ width: 80, height: 28 }}
+                source={require("@/assets/images/logos/trafegon-azul.png")}
+                style={{ width: 100, height: 32 }}
                 resizeMode="contain"
               />
             </View>
