@@ -37,3 +37,6 @@
 - [x] Garantir acesso via navegador web em smartphones
 - [x] Testar responsividade em diferentes tamanhos de tela
 - [ ] Preparar aplicativo para publicação na Play Store (Android)
+- [x] Atualizar paleta de cores conforme manual de marca Espaçolaser (cores clássicas)
+- [x] Aplicar fundo branco na tela de login
+- [x] Adicionar fontes Barlow Condensed e Barlow conforme padrão da marca

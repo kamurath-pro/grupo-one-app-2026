@@ -546,7 +546,7 @@ export default function LoginScreen() {
   );
 
   return (
-    <ScreenContainer edges={["top", "bottom", "left", "right"]}>
+    <ScreenContainer edges={["top", "bottom", "left", "right"]} containerClassName="bg-white">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
@@ -556,7 +556,7 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className="flex-1 justify-center px-6 py-8" style={{ maxWidth: 480, alignSelf: 'center', width: '100%' }}>
+          <View className="flex-1 justify-center px-6 py-8" style={{ maxWidth: 480, alignSelf: 'center', width: '100%', backgroundColor: '#FFFFFF' }}>
             {/* Logo Area - Grupo ONE logo */}
             <View className="items-center mb-8">
               <Image

@@ -5,7 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
-import { Platform } from "react-native";
+import { Platform, View, Text } from "react-native";
 import "@/lib/_core/nativewind-pressable";
 import { ThemeProvider } from "@/lib/theme-provider";
 import {
@@ -15,6 +15,21 @@ import {
   initialWindowMetrics,
 } from "react-native-safe-area-context";
 import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
+
+// Barlow fonts - Espaçolaser brand typography
+import {
+  useFonts,
+  Barlow_400Regular,
+  Barlow_500Medium,
+  Barlow_600SemiBold,
+  Barlow_700Bold,
+} from "@expo-google-fonts/barlow";
+import {
+  BarlowCondensed_400Regular,
+  BarlowCondensed_500Medium,
+  BarlowCondensed_600SemiBold,
+  BarlowCondensed_700Bold,
+} from "@expo-google-fonts/barlow-condensed";
 
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
@@ -34,6 +49,18 @@ export default function RootLayout() {
 
   const [insets, setInsets] = useState<EdgeInsets>(initialInsets);
   const [frame, setFrame] = useState<Rect>(initialFrame);
+
+  // Load Barlow fonts
+  const [fontsLoaded] = useFonts({
+    Barlow_400Regular,
+    Barlow_500Medium,
+    Barlow_600SemiBold,
+    Barlow_700Bold,
+    BarlowCondensed_400Regular,
+    BarlowCondensed_500Medium,
+    BarlowCondensed_600SemiBold,
+    BarlowCondensed_700Bold,
+  });
 
   // Initialize Manus runtime for cookie injection from parent container
   useEffect(() => {
@@ -79,6 +106,15 @@ export default function RootLayout() {
       },
     };
   }, [initialInsets, initialFrame]);
+
+  // Show loading screen while fonts are loading
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#FFFFFF" }}>
+        <Text style={{ color: "#003FC3", fontSize: 16 }}>Carregando...</Text>
+      </View>
+    );
+  }
 
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
