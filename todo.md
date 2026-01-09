@@ -143,3 +143,15 @@
 - [x] Disparar notificação no dia do aniversário de cada colaborador
 - [x] Permitir marcar notificações como lidas
 - [x] Testar fluxo completo de notificações (24 testes passando)
+
+## Ajustes v4.3 - Limpeza e Padronização
+- [x] Métricas: remover seção "Recursos" (Relatórios Mensais e Notas Fiscais)
+- [x] Métricas: manter apenas "Performance do Tráfego Pago"
+- [x] Header: adicionar logo Espaçolaser + sininho na aba Chat
+- [x] Header: adicionar logo Espaçolaser + sininho na aba Reconhecer
+- [x] Header: adicionar logo Espaçolaser + sininho na aba Perfil
+- [x] Chat: remover seção "Aniversariantes"
+- [x] Perfil > Configurações: remover "Notificações"
+- [x] Perfil > Configurações: remover "Privacidade"
+- [x] Perfil > Suporte: remover "Central de ajuda"
+- [x] Perfil > Suporte: remover "Termos de uso"

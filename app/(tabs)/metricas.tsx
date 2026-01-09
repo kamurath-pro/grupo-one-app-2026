@@ -140,7 +140,7 @@ export default function MetricasScreen() {
   if (!isAuthenticated || !isSocio) {
     return (
       <View style={styles.container}>
-        <AppHeader showBack title="Métricas" />
+        <AppHeader showBack />
         <View style={styles.noAccessContainer}>
           <MaterialIcons name="lock" size={48} color="#9CA3AF" />
           <Text style={styles.noAccessText}>Acesso restrito a sócios</Text>
@@ -153,7 +153,7 @@ export default function MetricasScreen() {
   if (!selectedUnit) {
     return (
       <View style={styles.container}>
-        <AppHeader showBack title="Métricas" />
+        <AppHeader showBack />
         <ScrollView contentContainerStyle={styles.selectUnitContainer}>
           <View style={styles.headerBadge}>
             <Text style={styles.headerBadgeText}>PAINEL EXECUTIVO</Text>
@@ -187,7 +187,7 @@ export default function MetricasScreen() {
   // Tela de métricas da unidade selecionada
   return (
     <View style={styles.container}>
-      <AppHeader showBack title="Métricas" />
+      <AppHeader showBack />
       
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -208,40 +208,6 @@ export default function MetricasScreen() {
               <MaterialIcons name="keyboard-arrow-down" size={16} color="#FFFFFF" />
             )}
           </Pressable>
-        </View>
-
-        {/* Recursos */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recursos</Text>
-          <View style={styles.resourcesRow}>
-            <Pressable
-              style={({ pressed }) => [
-                styles.resourceCard,
-                pressed && styles.resourceCardPressed,
-              ]}
-              onPress={handleOpenRelatorios}
-            >
-              <View style={[styles.resourceIcon, { backgroundColor: "#E6F0FF" }]}>
-                <MaterialIcons name="add-circle-outline" size={24} color="#003FC3" />
-              </View>
-              <Text style={styles.resourceTitle}>Relatórios Mensais</Text>
-              <Text style={styles.resourceAction}>ACESSAR DOCUMENTO</Text>
-            </Pressable>
-
-            <Pressable
-              style={({ pressed }) => [
-                styles.resourceCard,
-                pressed && styles.resourceCardPressed,
-              ]}
-              onPress={handleOpenNotasFiscais}
-            >
-              <View style={[styles.resourceIcon, { backgroundColor: "#FFF3E0" }]}>
-                <MaterialIcons name="description" size={24} color="#FF9012" />
-              </View>
-              <Text style={styles.resourceTitle}>Notas Fiscais</Text>
-              <Text style={styles.resourceAction}>ACESSAR DOCUMENTO</Text>
-            </Pressable>
-          </View>
         </View>
 
         {/* Performance do Tráfego Pago */}

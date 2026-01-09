@@ -5,6 +5,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppAuth } from "@/lib/auth-context";
 import { useData, Recognition } from "@/lib/data-context";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppHeader } from "@/components/app-header";
+import { useNotifications } from "@/lib/notification-context";
 import * as Haptics from "expo-haptics";
 import { Platform } from "react-native";
 
@@ -264,6 +266,7 @@ export default function RecognitionScreen() {
   const { width } = useWindowDimensions();
   const { isAuthenticated, loading: authLoading } = useAppAuth();
   const { recognitions, sendRecognition } = useData();
+  const { unreadCount } = useNotifications();
   const [showNewRecognition, setShowNewRecognition] = useState(false);
 
   const isLargeScreen = width >= 768;
@@ -288,19 +291,11 @@ export default function RecognitionScreen() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      {/* Header Azul */}
-      <View style={{ backgroundColor: "#003FC3", paddingTop: insets.top }}>
-        <View className="flex-row items-center justify-between px-4 py-3">
-          <Image
-            source={require("@/assets/images/logo-grupo-one.png")}
-            style={{ width: 100, height: 36 }}
-            resizeMode="contain"
-          />
-          <TouchableOpacity className="relative p-2" activeOpacity={0.7}>
-            <IconSymbol name="bell.fill" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      {/* Header com Logo Espaçolaser */}
+      <AppHeader 
+        notificationCount={unreadCount}
+        onNotificationPress={() => router.push("/notifications" as any)}
+      />
 
       {/* Título */}
       <View className="px-4 pt-4 pb-2">

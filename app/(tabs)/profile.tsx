@@ -4,6 +4,8 @@ import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppAuth } from "@/lib/auth-context";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppHeader } from "@/components/app-header";
+import { useNotifications } from "@/lib/notification-context";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,6 +17,7 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { user, isAuthenticated, loading: authLoading, logout } = useAppAuth();
+  const { unreadCount } = useNotifications();
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
 
   const isLargeScreen = width >= 768;
@@ -164,19 +167,11 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      {/* Header Azul */}
-      <View style={{ backgroundColor: "#003FC3", paddingTop: insets.top }}>
-        <View className="flex-row items-center justify-between px-4 py-3">
-          <Image
-            source={require("@/assets/images/logo-grupo-one.png")}
-            style={{ width: 100, height: 36 }}
-            resizeMode="contain"
-          />
-          <TouchableOpacity className="relative p-2" activeOpacity={0.7}>
-            <IconSymbol name="bell.fill" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      {/* Header com Logo Espaçolaser */}
+      <AppHeader 
+        notificationCount={unreadCount}
+        onNotificationPress={() => router.push("/notifications" as any)}
+      />
 
       <ScrollView
         className="flex-1"
@@ -254,7 +249,7 @@ export default function ProfileScreen() {
             <View className="bg-white rounded-xl overflow-hidden border border-gray-100">
               {/* Editar Perfil */}
               <TouchableOpacity
-                className="flex-row items-center p-4 border-b border-gray-100"
+                className="flex-row items-center p-4"
                 activeOpacity={0.7}
               >
                 <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: "#E6F0FF" }}>
@@ -263,73 +258,6 @@ export default function ProfileScreen() {
                 <View className="flex-1 ml-3">
                   <Text className="font-medium text-gray-900">Editar Perfil</Text>
                   <Text className="text-sm text-gray-500">Altere suas informações</Text>
-                </View>
-                <IconSymbol name="chevron.right" size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-
-              {/* Notificações */}
-              <TouchableOpacity
-                className="flex-row items-center p-4 border-b border-gray-100"
-                activeOpacity={0.7}
-              >
-                <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: "#DCFCE7" }}>
-                  <IconSymbol name="bell.fill" size={20} color="#22C55E" />
-                </View>
-                <View className="flex-1 ml-3">
-                  <Text className="font-medium text-gray-900">Notificações</Text>
-                  <Text className="text-sm text-gray-500">Configure seus alertas</Text>
-                </View>
-                <IconSymbol name="chevron.right" size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-
-              {/* Privacidade */}
-              <TouchableOpacity
-                className="flex-row items-center p-4"
-                activeOpacity={0.7}
-              >
-                <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: "#FFF3E0" }}>
-                  <IconSymbol name="lock.fill" size={20} color="#FF9012" />
-                </View>
-                <View className="flex-1 ml-3">
-                  <Text className="font-medium text-gray-900">Privacidade</Text>
-                  <Text className="text-sm text-gray-500">Gerencie seus dados</Text>
-                </View>
-                <IconSymbol name="chevron.right" size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Seção de Suporte */}
-          <View className="mx-4 mt-6">
-            <Text className="text-sm font-medium text-gray-500 mb-3 px-2">SUPORTE</Text>
-            
-            <View className="bg-white rounded-xl overflow-hidden border border-gray-100">
-              {/* Ajuda */}
-              <TouchableOpacity
-                className="flex-row items-center p-4 border-b border-gray-100"
-                activeOpacity={0.7}
-              >
-                <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: "#E6F0FF" }}>
-                  <IconSymbol name="questionmark.circle.fill" size={20} color="#003FC3" />
-                </View>
-                <View className="flex-1 ml-3">
-                  <Text className="font-medium text-gray-900">Central de Ajuda</Text>
-                  <Text className="text-sm text-gray-500">Dúvidas frequentes</Text>
-                </View>
-                <IconSymbol name="chevron.right" size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-
-              {/* Termos */}
-              <TouchableOpacity
-                className="flex-row items-center p-4"
-                activeOpacity={0.7}
-              >
-                <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: "#F3F4F6" }}>
-                  <IconSymbol name="doc.text.fill" size={20} color="#6B7280" />
-                </View>
-                <View className="flex-1 ml-3">
-                  <Text className="font-medium text-gray-900">Termos de Uso</Text>
-                  <Text className="text-sm text-gray-500">Políticas e termos</Text>
                 </View>
                 <IconSymbol name="chevron.right" size={20} color="#9CA3AF" />
               </TouchableOpacity>

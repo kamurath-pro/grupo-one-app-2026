@@ -5,6 +5,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppAuth } from "@/lib/auth-context";
 import { useData, Conversation, Message } from "@/lib/data-context";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { AppHeader } from "@/components/app-header";
+import { useNotifications } from "@/lib/notification-context";
 
 function ChatModal({
   visible,
@@ -192,20 +194,12 @@ export default function ChatScreen() {
   const { width } = useWindowDimensions();
   const { isAuthenticated, loading: authLoading, user } = useAppAuth();
   const { conversations, startConversation, allUsers } = useData();
+  const { unreadCount } = useNotifications();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [showNewChat, setShowNewChat] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const isLargeScreen = width >= 768;
-
-  // Aniversariantes de exemplo
-  const birthdays = [
-    { name: "Valmir Pinto", date: "19/09", avatarUrl: null, isToday: true },
-    { name: "Amanda Machado", date: "20/09", avatarUrl: null, isToday: false },
-    { name: "Lucas Mendes", date: "27/09", avatarUrl: null, isToday: false },
-    { name: "Carlos Andrade", date: "27/09", avatarUrl: null, isToday: false },
-    { name: "Jéssica Flores", date: "29/09", avatarUrl: null, isToday: false },
-  ];
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -239,19 +233,11 @@ export default function ChatScreen() {
 
   return (
     <View className="flex-1 bg-gray-50">
-      {/* Header Azul */}
-      <View style={{ backgroundColor: "#003FC3", paddingTop: insets.top }}>
-        <View className="flex-row items-center justify-between px-4 py-3">
-          <Image
-            source={require("@/assets/images/logo-grupo-one.png")}
-            style={{ width: 100, height: 36 }}
-            resizeMode="contain"
-          />
-          <TouchableOpacity className="relative p-2" activeOpacity={0.7}>
-            <IconSymbol name="bell.fill" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      {/* Header com Logo Espaçolaser */}
+      <AppHeader 
+        notificationCount={unreadCount}
+        onNotificationPress={() => router.push("/notifications" as any)}
+      />
 
       <ScrollView
         className="flex-1"
@@ -260,47 +246,8 @@ export default function ChatScreen() {
       >
         <View style={{ maxWidth: isLargeScreen ? 800 : undefined, alignSelf: "center", width: "100%" }}>
           
-          {/* Seção de Aniversariantes */}
-          <View className="py-4">
-            <Text className="text-base font-semibold text-gray-900 px-4 mb-3">Aniversariantes</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16 }}
-            >
-              {birthdays.map((person, index) => (
-                <View key={index} className="items-center mr-4" style={{ width: 70 }}>
-                  <View
-                    className="w-14 h-14 rounded-full items-center justify-center mb-1"
-                    style={{
-                      backgroundColor: person.isToday ? "#003FC3" : "#E5E7EB",
-                      borderWidth: person.isToday ? 3 : 0,
-                      borderColor: "#003FC3",
-                    }}
-                  >
-                    <Text
-                      className="text-lg font-bold"
-                      style={{ color: person.isToday ? "#FFFFFF" : "#6B7280" }}
-                    >
-                      {person.name.charAt(0)}
-                    </Text>
-                  </View>
-                  <Text className="text-xs text-gray-900 text-center" numberOfLines={1}>
-                    {person.name.split(" ")[0]}
-                  </Text>
-                  <Text
-                    className="text-xs"
-                    style={{ color: person.isToday ? "#003FC3" : "#6B7280", fontWeight: person.isToday ? "600" : "400" }}
-                  >
-                    {person.date}
-                  </Text>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
-
           {/* Título Mensagens */}
-          <View className="flex-row items-center justify-between px-4 mb-3">
+          <View className="flex-row items-center justify-between px-4 pt-4 mb-3">
             <Text className="text-base font-semibold text-gray-900">Mensagens</Text>
             <TouchableOpacity
               className="w-8 h-8 rounded-full items-center justify-center"
