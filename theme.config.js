@@ -1,8 +1,10 @@
 /** @type {const} */
 const themeColors = {
-  primary: { light: '#0a7ea4', dark: '#0a7ea4' },
-  background: { light: '#ffffff', dark: '#151718' },
-  surface: { light: '#f5f5f5', dark: '#1e2022' },
+  // Cores baseadas na identidade visual da Espaçolaser (azul)
+  primary: { light: '#2D4BA0', dark: '#4169E1' },      // Azul Espaçolaser
+  accent: { light: '#1E90FF', dark: '#6495ED' },       // Azul claro para destaques
+  background: { light: '#ffffff', dark: '#0F1419' },
+  surface: { light: '#F5F7FA', dark: '#1A1F26' },
   foreground: { light: '#11181C', dark: '#ECEDEE' },
   muted: { light: '#687076', dark: '#9BA1A6' },
   border: { light: '#E5E7EB', dark: '#334155' },

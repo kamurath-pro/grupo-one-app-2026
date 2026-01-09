@@ -1,0 +1,34 @@
+# Project TODO
+
+- [x] Configurar tema e cores do Grupo ONE (cores Espaçolaser)
+- [x] Configurar estrutura de navegação (Tab Bar com 5 abas)
+- [x] Criar tela de Login com autenticação
+- [x] Implementar sistema de usuários com roles (Sócio, Gerente, Consultora)
+- [x] Criar banco de dados com tabelas de usuários, unidades e permissões
+- [x] Implementar tela Home (Feed) com posts e interações
+- [x] Criar tela de Arquivos com navegação de pastas
+- [x] Implementar filtro de arquivos por unidade e cargo
+- [x] Criar tela de Chat com lista de conversas
+- [ ] Implementar mensagens individuais e em grupo
+- [x] Criar tela de Reconhecimento para envio de gestos
+- [x] Implementar tela de Perfil com informações do usuário
+- [x] Aplicar logo do Grupo ONE (recebido do usuário)
+- [x] Configurar branding no app.config.ts
+- [ ] Criar dados de exemplo para demonstração
+- [ ] Testar fluxos principais do aplicativo
+- [x] Atualizar paleta de cores para cores oficiais da Espaçolaser
+- [ ] Implementar cadastro/login com Google OAuth
+- [x] Aplicar logo da Espaçolaser enviada pelo usuário
+- [x] Implementar sistema de aprovação de cadastros pelo administrador
+- [ ] Simplificar fluxo: sócios/gerentes pré-cadastrados, apenas consultoras fazem cadastro
+- [x] Configurar agenciatrafegon@gmail.com como administrador
+- [x] Criar painel de aprovação de cadastros pendentes
+- [x] Atualizar sistema: gerentes fazem cadastro igual consultoras (precisam aprovação)
+- [x] Configurar sócios com login/senha do PDF (nome + senha 4 dígitos)
+- [x] Implementar acesso aos links do Drive por unidade para sócios
+- [ ] Implementar visualização de dados de tráfego em tempo real (fonte de dados)
+- [x] Aplicar logo da Espaçolaser como ícone do app
+- [x] Aplicar logo do Grupo ONE na tela de login
+- [x] Aplicar logo da TráfegON no rodapé
+- [x] Implementar upload e exibição de foto de perfil
+- [x] Implementar funcionalidade de remover usuários (demissão)

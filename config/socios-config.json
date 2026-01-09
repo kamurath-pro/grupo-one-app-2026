@@ -1,0 +1,140 @@
+{
+  "socios": [
+    {
+      "nome": "Lia",
+      "senha": "1346",
+      "unidades": ["Araripina"],
+      "saudacao": "Olá, Lia!",
+      "acessos": {
+        "Araripina": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1_ruchybS9pn0wJLPPxQ532ERujkaFkXv?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/1KzbqZIewrEoKOajE3fO8ktOG25GCyb9z?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/1XxorSEspVwY-VAa8XeR2YleixguDwGwVaumu3rQS9OI/edit?usp=sharing"
+        }
+      }
+    },
+    {
+      "nome": "Márcio",
+      "senha": "4679",
+      "unidades": ["Serra Talhada", "Vitória Sto Antão", "Livramento", "Muriaé"],
+      "saudacao": "Olá, Márcio!",
+      "acessos": {
+        "Serra Talhada": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1rGELW3lZHYCSWwdxa-hKR2q3jHPi-RHy?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/19gVgCa02Hew0kZhek7FmUMG0FvY-_yKH?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/1xkhRGEhHMyntv2DcGtZPovX3vAzKglqEnbIRAFPxx10/edit?usp=sharing"
+        },
+        "Vitória Sto Antão": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1wJRrTnvmljdl6rAUdCiV-h8BjNjGUrDI?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/11LxWga_VVM2BRszI06pCdjNuM5EKxXn1?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/1bZYM4-lw-7TWMtNcgX1apj5jrSpR1pBPXKAVxciSOWo/edit?usp=sharing"
+        },
+        "Livramento": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1j_r24CSTMmCNogC0gTjBhj7MwRG2i0ka?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/1naISJBwVcAnHG5PLHOFU1DbTh-BRVcgP?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/1NOeinp7l0oiXKb5zdjzmJ6C1YwMmwrsAqBrfGgnJ0cU/edit?usp=sharing"
+        },
+        "Muriaé": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1ujtuox4piCGb9J301p90v-XuPMH7sn__?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/13X2o3N3Zw0CkCCdi7bjgoF1Sq_4SARge?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/12kkXFpvxDbn-iOAEph1BW6kVJCed2C41ht37rPt6ZJM/edit?usp=sharing"
+        }
+      }
+    },
+    {
+      "nome": "Raquel",
+      "senha": "7946",
+      "unidades": ["Garanhuns", "Cajazeiras"],
+      "saudacao": "Olá, Raquel!",
+      "acessos": {
+        "Garanhuns": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1iKWGCbn1WwmHAb9mnpqwCXhVBs2igiD_?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/1kUjXtqx4kkO5ZjL_FcDm6vVEMh7TRXiv?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/1XPFZn437dv9wzMG7jX9kZVpPhsuzlRkWPlhmSC19DYY/edit?usp=sharing"
+        },
+        "Cajazeiras": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/10HR6RhTKkvRxEy5N5NGY2wL4ZTHvt7PS?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/1EVFh7SNUhb6P2F61860ny8P3Lsm_DeeZ?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/12eWifNFUc5gVLGdPG48OUgWXzgiKnCxckNz2bXT3e_Q/edit?usp=sharing"
+        }
+      }
+    },
+    {
+      "nome": "Evaristo",
+      "senha": "7946",
+      "unidades": ["Garanhuns", "Cajazeiras"],
+      "saudacao": "Olá, Evaristo!",
+      "acessos": {
+        "Garanhuns": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1iKWGCbn1WwmHAb9mnpqwCXhVBs2igiD_?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/1kUjXtqx4kkO5ZjL_FcDm6vVEMh7TRXiv?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/1XPFZn437dv9wzMG7jX9kZVpPhsuzlRkWPlhmSC19DYY/edit?usp=sharing"
+        },
+        "Cajazeiras": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/10HR6RhTKkvRxEy5N5NGY2wL4ZTHvt7PS?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/1EVFh7SNUhb6P2F61860ny8P3Lsm_DeeZ?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/12eWifNFUc5gVLGdPG48OUgWXzgiKnCxckNz2bXT3e_Q/edit?usp=sharing"
+        }
+      }
+    },
+    {
+      "nome": "Nádia",
+      "senha": "3121",
+      "unidades": ["Vilhena"],
+      "saudacao": "Olá, Nádia!",
+      "acessos": {
+        "Vilhena": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/12CiALcyE-MdDfwDcRyZi4mi8HT6H_kgJ?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/1jHryFarRc2KZqQW36npAR8L5fOHj2fpJ?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/19XhgdbWXFZLM3WbNASowzuBhKEhBxXHw2erhZwrHaY0/edit?usp=sharing"
+        }
+      }
+    },
+    {
+      "nome": "Fran",
+      "senha": "9864",
+      "unidades": ["Shopping Plaza Macaé", "Silva Jardim - Macaé"],
+      "saudacao": "Olá, Fran!",
+      "acessos": {
+        "Shopping Plaza Macaé": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1dWjMOMh_4UPWAa553bT-WHNxpe7vLxJV?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/1sDRzGPbnanSmXuup83UiG5KvFDWqEcin?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/1oVNAUdxSa1v-54QfAOLP7lyq0s-NYunU24sItzolrBw/edit?usp=sharing"
+        },
+        "Silva Jardim - Macaé": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1-xOyrz-s8-kUVA6z5c1A6q5nR1Q94t8R?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/10TEPFSoYWXsxY2QAvfLQ39ZrQJlK7SE0?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/15A37s0jyQEsLK5KTlRHkOPO1Hu1Bc3l-xQV1nWUiIZM/edit?usp=sharing"
+        }
+      }
+    },
+    {
+      "nome": "Eduardo",
+      "senha": "5612",
+      "unidades": ["Corumbá", "Fortaleza", "Plaza Macaé", "Centro Macaé"],
+      "saudacao": "Olá, Eduardo!",
+      "acessos": {
+        "Corumbá": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1Lc3NbJi4L107sZVOuniKJIXk1BM5--WD?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/1Su6GpN6imCEeNAN3_SeJz62hpBP5GWN2?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/1eK26sKMqm_B8jyVXBeMJ9XYp1lK94yDsI8vk4xkv95k/edit?usp=sharing"
+        },
+        "Fortaleza": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1DiPG8EKHT4ifF9U0UtGo7OS3sQo3vtJ_?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/12e9p8KE8l_EUvRs05sVef-2q5RNQtoSR?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/197SLVpeuz1Bt3W9oLmnto_MyFU5fijUcGo-OjKzhN6c/edit?usp=sharing"
+        },
+        "Plaza Macaé": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1dWjMOMh_4UPWAa553bT-WHNxpe7vLxJV?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/1sDRzGPbnanSmXuup83UiG5KvFDWqEcin?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/1oVNAUdxSa1v-54QfAOLP7lyq0s-NYunU24sItzolrBw/edit?usp=sharing"
+        },
+        "Centro Macaé": {
+          "relatoriosMensais": "https://drive.google.com/drive/folders/1-xOyrz-s8-kUVA6z5c1A6q5nR1Q94t8R?usp=sharing",
+          "notasFiscais": "https://drive.google.com/drive/folders/10TEPFSoYWXsxY2QAvfLQ39ZrQJlK7SE0?usp=sharing",
+          "fonteDados": "https://docs.google.com/spreadsheets/d/15A37s0jyQEsLK5KTlRHkOPO1Hu1Bc3l-xQV1nWUiIZM/edit?usp=sharing"
+        }
+      }
+    }
+  ]
+}
