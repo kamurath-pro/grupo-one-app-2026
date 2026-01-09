@@ -12,6 +12,7 @@ export interface AppUser {
   unitIds: number[]; // Sócios podem ter múltiplas unidades
   unitNames: string[];
   avatarUrl?: string;
+  photoUrl?: string;
   approvalStatus: ApprovalStatus;
   registeredAt?: Date;
   saudacao?: string;

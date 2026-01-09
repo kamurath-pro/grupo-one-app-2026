@@ -1,34 +1,50 @@
 import { useState, useCallback } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Image, RefreshControl, useWindowDimensions, Modal, TextInput, FlatList } from "react-native";
+import { View, Text, ScrollView, Pressable, RefreshControl, useWindowDimensions, Modal, TextInput, Linking, Platform } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAppAuth } from "@/lib/auth-context";
 import { useData } from "@/lib/data-context";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { FloatingButton } from "@/components/floating-button";
+import { AppHeader } from "@/components/app-header";
+import { FooterLogos } from "@/components/footer-logos";
+import { ProfilePhoto } from "@/components/profile-photo";
 
-// Categorias do Mural
-const CATEGORIES = [
-  { id: "geral", label: "GER", name: "Geral", color: "#1A1A2E" },
-  { id: "mkt", label: "MKT", name: "Marketing", color: "#00B4D8" },
-  { id: "adm", label: "ADM", name: "Administrativo", color: "#003FC3" },
-  { id: "vendas", label: "VED", name: "Vendas", color: "#417CFF" },
-  { id: "rh", label: "RH", name: "RH", color: "#DF007E" },
+// Unidades (Times) para filtro
+const UNIDADES = [
+  { id: "geral", label: "Geral", icon: "groups" },
+  { id: "araripina", label: "Araripina", icon: "location-on" },
+  { id: "serra", label: "Serra Talhada", icon: "location-on" },
+  { id: "garanhuns", label: "Garanhuns", icon: "location-on" },
+  { id: "cajazeiras", label: "Cajazeiras", icon: "location-on" },
+  { id: "vitoria", label: "Vitória", icon: "location-on" },
+  { id: "livramento", label: "Livramento", icon: "location-on" },
+  { id: "muriae", label: "Muriaé", icon: "location-on" },
+  { id: "vilhena", label: "Vilhena", icon: "location-on" },
+  { id: "corumba", label: "Corumbá", icon: "location-on" },
+  { id: "fortaleza", label: "Fortaleza", icon: "location-on" },
+  { id: "macae-plaza", label: "Macaé Plaza", icon: "location-on" },
+  { id: "macae-centro", label: "Macaé Centro", icon: "location-on" },
 ];
 
-// Portal Cards Config
-const PORTAL_CARDS = [
-  { id: "arquivos", title: "Arquivos", description: "Acesse os documentos da sua unidade", icon: "folder.fill", iconColor: "#003FC3", iconBg: "#E6F0FF", route: "/files" },
-  { id: "metricas", title: "Métricas", description: "Dados de tráfego em tempo real", icon: "chart.bar.fill", iconColor: "#22C55E", iconBg: "#DCFCE7", route: null },
-  { id: "institucional", title: "Institucional", description: "Informações da Espaçolaser", icon: "building.2.fill", iconColor: "#FF9012", iconBg: "#FFF3E0", route: null },
-  { id: "suporte", title: "Suporte", description: "Tire suas dúvidas", icon: "questionmark.circle.fill", iconColor: "#DF007E", iconBg: "#FCE4EC", route: null },
+// Portal Cards - Sócios veem 4, colaboradores/gerentes veem 2
+const PORTAL_CARDS_SOCIO = [
+  { id: "documentos", title: "Documentos", description: "Acesse os documentos da sua unidade", icon: "folder", iconColor: "#003FC3", iconBg: "#E6F0FF", route: "/(tabs)/files" },
+  { id: "metricas", title: "Métricas", description: "Dados de tráfego em tempo real", icon: "bar-chart", iconColor: "#22C55E", iconBg: "#DCFCE7", route: null, action: "metricas" },
+  { id: "arquivos-uteis", title: "Arquivos Úteis", description: "Informações da Espaçolaser", icon: "description", iconColor: "#FF9012", iconBg: "#FFF3E0", route: null },
+  { id: "suporte", title: "Suporte", description: "Tire suas dúvidas", icon: "help-outline", iconColor: "#DF007E", iconBg: "#FCE4EC", route: null, action: "suporte" },
+];
+
+const PORTAL_CARDS_COLABORADOR = [
+  { id: "documentos", title: "Documentos", description: "Acesse os documentos da sua unidade", icon: "folder", iconColor: "#003FC3", iconBg: "#E6F0FF", route: "/(tabs)/files" },
+  { id: "suporte", title: "Suporte", description: "Tire suas dúvidas", icon: "help-outline", iconColor: "#DF007E", iconBg: "#FCE4EC", route: null, action: "suporte" },
 ];
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { user, isSocio } = useAppAuth();
-  const { posts, addPost, likePost, allUsers } = useData();
+  const { posts, addPost, likePost, addComment, allUsers } = useData();
 
   // Gerar aniversariantes de exemplo
   const birthdays = [
@@ -38,30 +54,55 @@ export default function HomeScreen() {
   ];
 
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("geral");
+  const [selectedUnidade, setSelectedUnidade] = useState("geral");
   const [activeTab, setActiveTab] = useState<"mural" | "membros">("mural");
   const [showNewPostModal, setShowNewPostModal] = useState(false);
   const [newPostContent, setNewPostContent] = useState("");
-  const [newPostCategory, setNewPostCategory] = useState("geral");
+  const [newPostUnidade, setNewPostUnidade] = useState("geral");
+  const [commentModalPost, setCommentModalPost] = useState<any>(null);
+  const [newComment, setNewComment] = useState("");
 
   const isLargeScreen = width >= 768;
+  const portalCards = isSocio ? PORTAL_CARDS_SOCIO : PORTAL_CARDS_COLABORADOR;
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
+  const handlePortalAction = (card: any) => {
+    if (card.route) {
+      router.push(card.route as any);
+    } else if (card.action === "suporte") {
+      // Abrir WhatsApp
+      Linking.openURL("https://wa.me/5587996466975");
+    } else if (card.action === "metricas") {
+      // TODO: Abrir métricas do Google Sheets
+      if (Platform.OS === "web") {
+        alert("Métricas em tempo real - Em breve!");
+      }
+    }
+  };
+
   const handleCreatePost = () => {
     if (newPostContent.trim()) {
-      addPost(newPostContent.trim(), newPostCategory);
+      addPost(newPostContent.trim(), newPostUnidade);
       setNewPostContent("");
       setShowNewPostModal(false);
     }
   };
 
-  const filteredPosts = selectedCategory === "geral" 
+  const handleAddComment = () => {
+    if (newComment.trim() && commentModalPost) {
+      addComment(commentModalPost.id, newComment.trim());
+      setNewComment("");
+      setCommentModalPost(null);
+    }
+  };
+
+  const filteredPosts = selectedUnidade === "geral" 
     ? posts 
-    : posts.filter((p: any) => p.category === selectedCategory);
+    : posts.filter((p: any) => p.category === selectedUnidade);
 
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
@@ -76,83 +117,73 @@ export default function HomeScreen() {
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
-      {/* Header Azul */}
-      <View style={{ backgroundColor: "#003FC3", paddingTop: insets.top }}>
-        <View className="flex-row items-center justify-between px-4 py-3">
-          <Image
-            source={require("@/assets/images/logo-grupo-one.png")}
-            style={{ width: 100, height: 36 }}
-            resizeMode="contain"
-          />
-          <TouchableOpacity className="relative p-2" activeOpacity={0.7}>
-            <IconSymbol name="bell.fill" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-      </View>
+    <View style={{ flex: 1, backgroundColor: "#F5F7FA" }}>
+      {/* Header com Logo Espaçolaser */}
+      <AppHeader />
 
       <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: 100 }}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#003FC3" />}
         showsVerticalScrollIndicator={false}
       >
         <View style={{ maxWidth: isLargeScreen ? 800 : undefined, alignSelf: "center", width: "100%" }}>
           
-          {/* Saudação */}
-          <View className="px-4 pt-4 pb-2">
-            <Text className="text-lg text-gray-900">
-              {user?.saudacao || `Olá, ${user?.name?.split(" ")[0] || "Usuário"}!`}
-            </Text>
-            <Text className="text-sm text-gray-500">
-              {user?.unitNames?.join(", ") || "Grupo ONE"}
-            </Text>
+          {/* Saudação com Foto de Perfil */}
+          <View style={styles.greetingContainer}>
+            <ProfilePhoto
+              uri={user?.photoUrl}
+              name={user?.name || "Usuário"}
+              size={48}
+            />
+            <View style={styles.greetingText}>
+              <Text style={styles.greetingName}>
+                Olá, {user?.name?.split(" ")[0] || "Usuário"}!
+              </Text>
+              <Text style={styles.greetingUnit}>
+                {user?.unitNames?.join(", ") || "Grupo ONE"}
+              </Text>
+            </View>
           </View>
 
           {/* Comunicado / Banner */}
-          <View className="px-4 py-3">
-            <Text className="text-base font-semibold text-gray-900 mb-3">Comunicado</Text>
-            <TouchableOpacity 
-              className="rounded-xl overflow-hidden"
-              style={{ backgroundColor: "#001C65" }}
-              activeOpacity={0.9}
-            >
-              <View className="p-4">
-                <Text className="text-xs text-blue-200 mb-1">Novidade</Text>
-                <Text className="text-lg font-bold text-white mb-2">
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Comunicado</Text>
+            <Pressable style={styles.banner}>
+              <View style={styles.bannerContent}>
+                <Text style={styles.bannerTag}>Novidade</Text>
+                <Text style={styles.bannerTitle}>
                   Bem-vindo ao App Grupo ONE!
                 </Text>
-                <Text className="text-sm text-blue-100">
+                <Text style={styles.bannerDescription}>
                   Conectando colaboradores e sócios das unidades Espaçolaser.
                 </Text>
               </View>
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {/* Portal - Grid de Cards */}
-          <View className="px-4 py-3">
-            <Text className="text-base font-semibold text-gray-900 mb-3">Portal</Text>
-            <View className="flex-row flex-wrap" style={{ marginHorizontal: -6 }}>
-              {PORTAL_CARDS.map((card) => (
-                <View key={card.id} style={{ width: "50%", paddingHorizontal: 6, marginBottom: 12 }}>
-                  <TouchableOpacity
-                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
-                    style={{ minHeight: 110 }}
-                    activeOpacity={0.7}
-                    onPress={() => card.route && router.push(card.route as any)}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Portal</Text>
+            <View style={styles.portalGrid}>
+              {portalCards.map((card) => (
+                <View key={card.id} style={styles.portalCardWrapper}>
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.portalCard,
+                      pressed && styles.portalCardPressed,
+                    ]}
+                    onPress={() => handlePortalAction(card)}
                   >
-                    <View className="flex-row items-start justify-between mb-3">
-                      <View
-                        className="w-10 h-10 rounded-lg items-center justify-center"
-                        style={{ backgroundColor: card.iconBg }}
-                      >
-                        <IconSymbol name={card.icon as any} size={20} color={card.iconColor} />
+                    <View style={styles.portalCardHeader}>
+                      <View style={[styles.portalIconContainer, { backgroundColor: card.iconBg }]}>
+                        <MaterialIcons name={card.icon as any} size={20} color={card.iconColor} />
                       </View>
-                      <IconSymbol name="chevron.right" size={16} color="#003FC3" />
+                      <MaterialIcons name="chevron-right" size={16} color="#003FC3" />
                     </View>
-                    <Text className="text-sm font-semibold text-gray-900 mb-1">{card.title}</Text>
-                    <Text className="text-xs text-gray-500" numberOfLines={2}>{card.description}</Text>
-                  </TouchableOpacity>
+                    <Text style={styles.portalCardTitle}>{card.title}</Text>
+                    <Text style={styles.portalCardDescription} numberOfLines={2}>{card.description}</Text>
+                  </Pressable>
                 </View>
               ))}
             </View>
@@ -160,244 +191,607 @@ export default function HomeScreen() {
 
           {/* Aniversariantes */}
           {birthdays.length > 0 && (
-            <View className="py-3">
-              <Text className="text-base font-semibold text-gray-900 px-4 mb-3">Aniversariantes</Text>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Aniversariantes</Text>
               <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: 16 }}
               >
                 {birthdays.map((person: any, index: number) => (
-                  <View key={index} className="items-center mr-4" style={{ width: 70 }}>
-                    <View 
-                      className="w-14 h-14 rounded-full items-center justify-center mb-1"
-                      style={{ 
-                        backgroundColor: index === 0 ? "#003FC3" : "#E5E7EB",
-                        borderWidth: index === 0 ? 2 : 0,
-                        borderColor: "#003FC3"
-                      }}
-                    >
+                  <View key={index} style={styles.birthdayItem}>
+                    <View style={[
+                      styles.birthdayAvatar,
+                      index === 0 && styles.birthdayAvatarHighlight
+                    ]}>
                       {person.avatarUrl ? (
-                        <Image source={{ uri: person.avatarUrl }} className="w-14 h-14 rounded-full" />
+                        <Image source={{ uri: person.avatarUrl }} style={styles.birthdayAvatarImage} />
                       ) : (
-                        <Text className="text-lg font-bold" style={{ color: index === 0 ? "#FFFFFF" : "#6B7280" }}>
+                        <Text style={[
+                          styles.birthdayAvatarText,
+                          index === 0 && styles.birthdayAvatarTextHighlight
+                        ]}>
                           {person.name.charAt(0)}
                         </Text>
                       )}
                     </View>
-                    <Text className="text-xs text-gray-900 text-center" numberOfLines={1}>{person.name.split(" ")[0]}</Text>
-                    <Text className="text-xs text-gray-500">{person.date}</Text>
+                    <Text style={styles.birthdayName} numberOfLines={1}>{person.name.split(" ")[0]}</Text>
+                    <Text style={styles.birthdayDate}>{person.date}</Text>
                   </View>
                 ))}
               </ScrollView>
             </View>
           )}
 
-          {/* Filtros de Categoria */}
-          <View className="py-3">
+          {/* Filtros de Times (Unidades) */}
+          <View style={styles.section}>
             <ScrollView 
               horizontal 
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ paddingHorizontal: 16 }}
             >
-              {CATEGORIES.map((cat) => (
-                <TouchableOpacity
-                  key={cat.id}
-                  className="items-center mr-4"
-                  onPress={() => setSelectedCategory(cat.id)}
-                  activeOpacity={0.7}
+              {UNIDADES.map((unidade) => (
+                <Pressable
+                  key={unidade.id}
+                  style={styles.unidadeItem}
+                  onPress={() => setSelectedUnidade(unidade.id)}
                 >
-                  <View
-                    className="w-12 h-12 rounded-full items-center justify-center mb-1"
-                    style={{
-                      backgroundColor: selectedCategory === cat.id ? cat.color : "#E5E7EB",
-                      borderWidth: selectedCategory === cat.id ? 0 : 1,
-                      borderColor: "#D1D5DB",
-                    }}
-                  >
-                    <Text
-                      className="text-xs font-bold"
-                      style={{ color: selectedCategory === cat.id ? "#FFFFFF" : "#6B7280" }}
-                    >
-                      {cat.label}
-                    </Text>
+                  <View style={[
+                    styles.unidadeCircle,
+                    selectedUnidade === unidade.id && styles.unidadeCircleSelected
+                  ]}>
+                    <MaterialIcons 
+                      name={unidade.icon as any} 
+                      size={20} 
+                      color={selectedUnidade === unidade.id ? "#FFFFFF" : "#6B7280"} 
+                    />
                   </View>
-                  <Text className="text-xs text-gray-600">{cat.name}</Text>
-                </TouchableOpacity>
+                  <Text style={[
+                    styles.unidadeLabel,
+                    selectedUnidade === unidade.id && styles.unidadeLabelSelected
+                  ]} numberOfLines={1}>
+                    {unidade.label}
+                  </Text>
+                </Pressable>
               ))}
             </ScrollView>
           </View>
 
           {/* Tabs: Mural / Membros */}
-          <View className="flex-row border-b border-gray-200 mx-4">
-            <TouchableOpacity
-              className="flex-1 py-3 items-center"
-              style={{ borderBottomWidth: activeTab === "mural" ? 2 : 0, borderBottomColor: "#003FC3" }}
+          <View style={styles.tabsContainer}>
+            <Pressable
+              style={[styles.tab, activeTab === "mural" && styles.tabActive]}
               onPress={() => setActiveTab("mural")}
             >
-              <View className="flex-row items-center gap-2">
-                <IconSymbol name="megaphone.fill" size={16} color={activeTab === "mural" ? "#003FC3" : "#6B7280"} />
-                <Text style={{ color: activeTab === "mural" ? "#003FC3" : "#6B7280", fontWeight: activeTab === "mural" ? "600" : "400" }}>
-                  Mural Oficial
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 py-3 items-center"
-              style={{ borderBottomWidth: activeTab === "membros" ? 2 : 0, borderBottomColor: "#003FC3" }}
+              <MaterialIcons 
+                name="campaign" 
+                size={16} 
+                color={activeTab === "mural" ? "#003FC3" : "#6B7280"} 
+              />
+              <Text style={[styles.tabText, activeTab === "mural" && styles.tabTextActive]}>
+                Mural Oficial
+              </Text>
+            </Pressable>
+            <Pressable
+              style={[styles.tab, activeTab === "membros" && styles.tabActive]}
               onPress={() => setActiveTab("membros")}
             >
-              <View className="flex-row items-center gap-2">
-                <IconSymbol name="person.2.fill" size={16} color={activeTab === "membros" ? "#003FC3" : "#6B7280"} />
-                <Text style={{ color: activeTab === "membros" ? "#003FC3" : "#6B7280", fontWeight: activeTab === "membros" ? "600" : "400" }}>
-                  Membros
-                </Text>
-              </View>
-            </TouchableOpacity>
+              <MaterialIcons 
+                name="people" 
+                size={16} 
+                color={activeTab === "membros" ? "#003FC3" : "#6B7280"} 
+              />
+              <Text style={[styles.tabText, activeTab === "membros" && styles.tabTextActive]}>
+                Membros
+              </Text>
+            </Pressable>
           </View>
 
           {/* Conteúdo do Tab */}
           {activeTab === "mural" ? (
-            <View className="px-4 py-4">
+            <View style={styles.postsContainer}>
               {filteredPosts.length === 0 ? (
-                <View className="items-center py-8">
-                  <IconSymbol name="doc.text.fill" size={48} color="#D1D5DB" />
-                  <Text className="text-gray-400 mt-2">Nenhuma publicação ainda</Text>
+                <View style={styles.emptyState}>
+                  <MaterialIcons name="article" size={48} color="#D1D5DB" />
+                  <Text style={styles.emptyStateText}>Nenhuma publicação ainda</Text>
                 </View>
               ) : (
                 filteredPosts.map((post: any) => (
-                  <View key={post.id} className="bg-white rounded-xl p-4 mb-4 shadow-sm border border-gray-100">
+                  <View key={post.id} style={styles.postCard}>
                     {/* Header do Post */}
-                    <View className="flex-row items-center mb-3">
-                      <View className="w-10 h-10 rounded-full bg-gray-200 items-center justify-center mr-3">
-                        {post.authorAvatar ? (
-                          <Image source={{ uri: post.authorAvatar }} className="w-10 h-10 rounded-full" />
-                        ) : (
-                          <Text className="text-sm font-bold text-gray-600">{post.authorName.charAt(0)}</Text>
-                        )}
+                    <View style={styles.postHeader}>
+                      <ProfilePhoto
+                        uri={post.authorAvatar}
+                        name={post.authorName}
+                        size={40}
+                      />
+                      <View style={styles.postAuthorInfo}>
+                        <Text style={styles.postAuthorName}>{post.authorName}</Text>
+                        <Text style={styles.postMeta}>{post.authorRole} • {formatTimeAgo(post.createdAt)}</Text>
                       </View>
-                      <View className="flex-1">
-                        <Text className="font-semibold text-gray-900">{post.authorName}</Text>
-                        <Text className="text-xs text-gray-500">{post.authorRole} • {formatTimeAgo(post.createdAt)}</Text>
-                      </View>
-                      <TouchableOpacity className="p-1">
-                        <IconSymbol name="info.circle.fill" size={20} color="#9CA3AF" />
-                      </TouchableOpacity>
                     </View>
 
                     {/* Conteúdo */}
-                    <Text className="text-gray-800 mb-3 leading-relaxed">{post.content}</Text>
+                    <Text style={styles.postContent}>{post.content}</Text>
 
                     {/* Imagem do Post (se houver) */}
                     {post.imageUrl && (
                       <Image
                         source={{ uri: post.imageUrl }}
-                        className="w-full h-48 rounded-lg mb-3"
-                        resizeMode="cover"
+                        style={styles.postImage}
+                        contentFit="cover"
                       />
                     )}
 
-                    {/* Reações */}
-                    <View className="flex-row items-center justify-between pt-2 border-t border-gray-100">
-                      <View className="flex-row items-center gap-1">
-                        <View className="flex-row">
-                          <View className="w-5 h-5 rounded-full bg-blue-500 items-center justify-center">
-                            <Text className="text-white text-xs">👍</Text>
-                          </View>
-                          <View className="w-5 h-5 rounded-full bg-red-500 items-center justify-center -ml-1">
-                            <Text className="text-white text-xs">❤️</Text>
-                          </View>
+                    {/* Contagem de reações */}
+                    <View style={styles.postStats}>
+                      {post.likes > 0 && (
+                        <View style={styles.postStatItem}>
+                          <MaterialIcons name="favorite" size={14} color="#003FC3" />
+                          <Text style={styles.postStatText}>{post.likes}</Text>
                         </View>
-                        <Text className="text-sm text-gray-500 ml-1">{post.likes}</Text>
-                      </View>
-                      <Text className="text-sm text-gray-500">{post.comments} comentários</Text>
+                      )}
+                      {post.comments > 0 && (
+                        <Text style={styles.postStatText}>{post.comments} comentários</Text>
+                      )}
                     </View>
 
-                    {/* Ações */}
-                    <View className="flex-row items-center justify-around mt-3 pt-3 border-t border-gray-100">
-                      <TouchableOpacity
-                        className="flex-row items-center gap-2 py-2 px-4"
+                    {/* Ações - Apenas Curtir e Comentar */}
+                    <View style={styles.postActions}>
+                      <Pressable
+                        style={styles.postActionButton}
                         onPress={() => likePost(post.id)}
-                        activeOpacity={0.7}
                       >
-                        <IconSymbol name="hand.thumbsup.fill" size={18} color={post.isLiked ? "#003FC3" : "#6B7280"} />
-                        <Text style={{ color: post.isLiked ? "#003FC3" : "#6B7280" }}>Curtir</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity className="flex-row items-center gap-2 py-2 px-4" activeOpacity={0.7}>
-                        <IconSymbol name="bubble.left.fill" size={18} color="#6B7280" />
-                        <Text className="text-gray-500">Comentar</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity className="flex-row items-center gap-2 py-2 px-4" activeOpacity={0.7}>
-                        <IconSymbol name="square.and.arrow.up" size={18} color="#6B7280" />
-                        <Text className="text-gray-500">Salvar</Text>
-                      </TouchableOpacity>
+                        <MaterialIcons 
+                          name={post.isLiked ? "favorite" : "favorite-border"} 
+                          size={20} 
+                          color={post.isLiked ? "#003FC3" : "#6B7280"} 
+                        />
+                        <Text style={[
+                          styles.postActionText,
+                          post.isLiked && styles.postActionTextActive
+                        ]}>Curtir</Text>
+                      </Pressable>
+                      <Pressable
+                        style={styles.postActionButton}
+                        onPress={() => setCommentModalPost(post)}
+                      >
+                        <MaterialIcons name="chat-bubble-outline" size={20} color="#6B7280" />
+                        <Text style={styles.postActionText}>Comentar</Text>
+                      </Pressable>
                     </View>
                   </View>
                 ))
               )}
             </View>
           ) : (
-            <View className="px-4 py-4">
-              <Text className="text-gray-500 text-center py-8">Lista de membros em breve</Text>
+            <View style={styles.postsContainer}>
+              {allUsers.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <MaterialIcons name="people" size={48} color="#D1D5DB" />
+                  <Text style={styles.emptyStateText}>Nenhum membro encontrado</Text>
+                </View>
+              ) : (
+                allUsers.map((member: any, index: number) => (
+                  <View key={index} style={styles.memberCard}>
+                    <ProfilePhoto
+                      uri={member.photoUrl}
+                      name={member.name}
+                      size={48}
+                    />
+                    <View style={styles.memberInfo}>
+                      <Text style={styles.memberName}>{member.name}</Text>
+                      <Text style={styles.memberRole}>{member.role}</Text>
+                      {member.unitNames && (
+                        <Text style={styles.memberUnit}>{member.unitNames.join(", ")}</Text>
+                      )}
+                    </View>
+                  </View>
+                ))
+              )}
             </View>
           )}
         </View>
+
+        {/* Rodapé com 4 Logos */}
+        <FooterLogos />
       </ScrollView>
 
-      {/* Botão Flutuante */}
-      <FloatingButton onPress={() => setShowNewPostModal(true)} />
-
-      {/* Modal de Novo Post */}
-      <Modal visible={showNewPostModal} animationType="slide" transparent>
-        <View className="flex-1 justify-end" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <View className="bg-white rounded-t-3xl" style={{ maxHeight: "80%" }}>
-            <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-              <TouchableOpacity onPress={() => setShowNewPostModal(false)}>
-                <Text className="text-gray-500">Cancelar</Text>
-              </TouchableOpacity>
-              <Text className="text-lg font-bold text-gray-900">Nova Publicação</Text>
-              <TouchableOpacity onPress={handleCreatePost}>
-                <Text style={{ color: "#003FC3" }} className="font-semibold">Publicar</Text>
-              </TouchableOpacity>
+      {/* Modal de Comentário */}
+      <Modal visible={!!commentModalPost} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Pressable onPress={() => setCommentModalPost(null)}>
+                <Text style={styles.modalCancelText}>Cancelar</Text>
+              </Pressable>
+              <Text style={styles.modalTitle}>Comentar</Text>
+              <Pressable onPress={handleAddComment}>
+                <Text style={styles.modalSubmitText}>Enviar</Text>
+              </Pressable>
             </View>
 
-            <ScrollView className="p-4">
-              {/* Categoria */}
-              <Text className="text-sm font-medium text-gray-600 mb-2">Categoria</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
-                {CATEGORIES.map((cat) => (
-                  <TouchableOpacity
-                    key={cat.id}
-                    className="mr-2 px-4 py-2 rounded-full"
-                    style={{
-                      backgroundColor: newPostCategory === cat.id ? cat.color : "#F5F7FA",
-                    }}
-                    onPress={() => setNewPostCategory(cat.id)}
-                  >
-                    <Text
-                      className="text-sm font-medium"
-                      style={{ color: newPostCategory === cat.id ? "#FFFFFF" : "#6B7280" }}
-                    >
-                      {cat.name}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              {/* Conteúdo */}
-              <TextInput
-                className="bg-gray-50 rounded-xl p-4 text-base text-gray-900"
-                style={{ minHeight: 150, textAlignVertical: "top" }}
-                placeholder="O que você quer compartilhar?"
-                placeholderTextColor="#9CA3AF"
-                multiline
-                value={newPostContent}
-                onChangeText={setNewPostContent}
-              />
-            </ScrollView>
+            <TextInput
+              style={styles.commentInput}
+              placeholder="Escreva seu comentário..."
+              placeholderTextColor="#9CA3AF"
+              multiline
+              value={newComment}
+              onChangeText={setNewComment}
+              autoFocus
+            />
           </View>
         </View>
       </Modal>
     </View>
   );
 }
+
+import { StyleSheet } from "react-native";
+
+const styles = StyleSheet.create({
+  greetingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  greetingText: {
+    marginLeft: 12,
+  },
+  greetingName: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  greetingUnit: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  section: {
+    paddingVertical: 12,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  banner: {
+    marginHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: "#001C65",
+    overflow: "hidden",
+  },
+  bannerContent: {
+    padding: 16,
+  },
+  bannerTag: {
+    fontSize: 12,
+    color: "#93C5FD",
+    marginBottom: 4,
+  },
+  bannerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginBottom: 8,
+  },
+  bannerDescription: {
+    fontSize: 14,
+    color: "#BFDBFE",
+  },
+  portalGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: 10,
+  },
+  portalCardWrapper: {
+    width: "50%",
+    paddingHorizontal: 6,
+    marginBottom: 12,
+  },
+  portalCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 16,
+    minHeight: 110,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  portalCardPressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
+  },
+  portalCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 12,
+  },
+  portalIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  portalCardTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: 4,
+  },
+  portalCardDescription: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  birthdayItem: {
+    alignItems: "center",
+    marginRight: 16,
+    width: 70,
+  },
+  birthdayAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#E5E7EB",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  birthdayAvatarHighlight: {
+    backgroundColor: "#003FC3",
+    borderWidth: 2,
+    borderColor: "#003FC3",
+  },
+  birthdayAvatarImage: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+  },
+  birthdayAvatarText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#6B7280",
+  },
+  birthdayAvatarTextHighlight: {
+    color: "#FFFFFF",
+  },
+  birthdayName: {
+    fontSize: 12,
+    color: "#111827",
+    textAlign: "center",
+  },
+  birthdayDate: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  unidadeItem: {
+    alignItems: "center",
+    marginRight: 16,
+  },
+  unidadeCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#E5E7EB",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+  },
+  unidadeCircleSelected: {
+    backgroundColor: "#003FC3",
+    borderColor: "#003FC3",
+  },
+  unidadeLabel: {
+    fontSize: 11,
+    color: "#6B7280",
+    maxWidth: 70,
+    textAlign: "center",
+  },
+  unidadeLabelSelected: {
+    color: "#003FC3",
+    fontWeight: "600",
+  },
+  tabsContainer: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    marginHorizontal: 16,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    gap: 8,
+  },
+  tabActive: {
+    borderBottomWidth: 2,
+    borderBottomColor: "#003FC3",
+  },
+  tabText: {
+    fontSize: 14,
+    color: "#6B7280",
+  },
+  tabTextActive: {
+    color: "#003FC3",
+    fontWeight: "600",
+  },
+  postsContainer: {
+    padding: 16,
+  },
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: 32,
+  },
+  emptyStateText: {
+    color: "#9CA3AF",
+    marginTop: 8,
+  },
+  postCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  postHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  postAuthorInfo: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  postAuthorName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  postMeta: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  postContent: {
+    fontSize: 14,
+    color: "#374151",
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  postImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  postStats: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+  },
+  postStatItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  postStatText: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  postActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+  },
+  postActionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  postActionText: {
+    fontSize: 14,
+    color: "#6B7280",
+  },
+  postActionTextActive: {
+    color: "#003FC3",
+    fontWeight: "500",
+  },
+  memberCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+  },
+  memberInfo: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  memberName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  memberRole: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
+  },
+  memberUnit: {
+    fontSize: 12,
+    color: "#003FC3",
+    marginTop: 2,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: "60%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  modalCancelText: {
+    color: "#6B7280",
+    fontSize: 14,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  modalSubmitText: {
+    color: "#003FC3",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  commentInput: {
+    padding: 16,
+    fontSize: 14,
+    color: "#111827",
+    minHeight: 120,
+    textAlignVertical: "top",
+  },
+});

@@ -54,3 +54,26 @@
 - [x] Redesenhar tela de Perfil
 - [x] Redesenhar tela de Admin
 - [x] Atualizar Tab Bar com ícones limpos
+
+
+## Atualização v3.0 - Ajustes Finais
+- [x] Copiar logos brancas para assets do projeto
+- [x] Header: Logo Espaçolaser branca horizontal no topo
+- [x] Portal para SÓCIOS: Documentos, Métricas, Arquivos Úteis, Suporte
+- [x] Portal para COLABORADORES/GERENTES: apenas Documentos e Suporte
+- [x] Documentos: Unidade > pastas (renomeado de Arquivos)
+- [ ] Métricas: painel com dados do Sheets em tempo real (pendente integração)
+- [ ] Arquivos Úteis: link para pasta do Drive (aguardar link)
+- [x] Suporte: "Fale com o Marketing" > WhatsApp wa.me/5587996466975
+- [x] Ícones adequados para cada card do Portal (Material Icons)
+- [x] Foto de perfil circular ao lado do nome do usuário
+- [x] Tab Bar: Home, Chat, BOTÃO + (centralizado sobressaindo), Reconhecer, Perfil
+- [x] Times (filtros): Geral, Araripina, Serra, Garanhuns, Cajazeiras, Vitória, Livramento, Muriaé, Vilhena, Corumbá, Fortaleza, Macaé Plaza, Macaé Centro
+- [x] Posts: remover ícone info e opção Salvar
+- [x] Curtir: coração que fica azul quando curtido (funcional)
+- [x] Comentar funcional (modal de comentário)
+- [x] Botão voltar funcional (navegação do smartphone)
+- [x] Rodapé com 4 logos em linha: Grupo ONE, Espaçolaser, Meta, TráfegON
+- [x] Garantir contraste correto (logo branca no fundo azul)
+- [x] Responsividade otimizada para todos os dispositivos
+- [ ] Tudo funcional em navegador e Play Store (em teste)

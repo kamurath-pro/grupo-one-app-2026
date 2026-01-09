@@ -1,6 +1,7 @@
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import { View, Text, Pressable, StyleSheet, Platform } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { IconSymbol } from "@/components/ui/icon-symbol";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 interface AppHeaderProps {
   title?: string;
@@ -22,60 +23,98 @@ export function AppHeader({
   notificationCount = 0,
 }: AppHeaderProps) {
   const insets = useSafeAreaInsets();
+  const topPadding = Platform.OS === "web" ? 12 : insets.top;
 
   return (
-    <View
-      style={{
-        backgroundColor: "#003FC3",
-        paddingTop: insets.top,
-      }}
-    >
-      <View className="flex-row items-center justify-between px-4 py-3">
+    <View style={[styles.container, { paddingTop: topPadding }]}>
+      <View style={styles.content}>
         {/* Left side */}
-        <View className="flex-row items-center flex-1">
+        <View style={styles.leftSide}>
           {showBack && (
-            <TouchableOpacity
-              onPress={onBackPress}
-              className="mr-3 p-1"
-              activeOpacity={0.7}
-            >
-              <IconSymbol name="chevron.left" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
+            <Pressable onPress={onBackPress} style={styles.backButton}>
+              <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />
+            </Pressable>
           )}
           
           {showLogo ? (
-            <View className="flex-row items-center">
-              <Image
-                source={require("@/assets/images/logo-grupo-one.png")}
-                style={{ width: 100, height: 36 }}
-                resizeMode="contain"
-              />
-            </View>
+            <Image
+              source={require("@/assets/images/logos/espacolaser-branca.png")}
+              style={styles.logo}
+              contentFit="contain"
+            />
           ) : title ? (
-            <Text className="text-white text-lg font-semibold">{title}</Text>
+            <Text style={styles.title}>{title}</Text>
           ) : null}
         </View>
 
         {/* Right side - Notification */}
         {showNotification && (
-          <TouchableOpacity
-            onPress={onNotificationPress}
-            className="relative p-2"
-            activeOpacity={0.7}
-          >
-            <IconSymbol name="bell.fill" size={24} color="#FFFFFF" />
+          <Pressable onPress={onNotificationPress} style={styles.notificationButton}>
+            <MaterialIcons name="notifications-none" size={26} color="#FFFFFF" />
             {notificationCount > 0 && (
-              <View
-                className="absolute -top-1 -right-1 bg-red-500 rounded-full min-w-[18px] h-[18px] items-center justify-center"
-              >
-                <Text className="text-white text-xs font-bold">
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>
                   {notificationCount > 99 ? "99+" : notificationCount}
                 </Text>
               </View>
             )}
-          </TouchableOpacity>
+          </Pressable>
         )}
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#003FC3",
+    width: "100%",
+  },
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    minHeight: 56,
+  },
+  leftSide: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  backButton: {
+    marginRight: 12,
+    padding: 4,
+  },
+  logo: {
+    width: 140,
+    height: 32,
+  },
+  title: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  notificationButton: {
+    padding: 4,
+    position: "relative",
+  },
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    backgroundColor: "#EF4444",
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+});

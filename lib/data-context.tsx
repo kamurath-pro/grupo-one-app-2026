@@ -8,11 +8,13 @@ export interface Post {
   authorName: string;
   authorRole: string;
   authorUnit: string;
+  authorAvatar?: string;
   content: string;
   imageUrl?: string;
-  likesCount: number;
-  commentsCount: number;
-  liked: boolean;
+  category: string; // unidade/time
+  likes: number;
+  comments: number;
+  isLiked: boolean;
   createdAt: Date;
 }
 
@@ -132,9 +134,10 @@ const INITIAL_POSTS: Post[] = [
     authorRole: "Sócia",
     authorUnit: "Serra Talhada",
     content: "Parabéns a toda equipe pelo excelente resultado do mês! Vocês são incríveis! 🎉",
-    likesCount: 12,
-    commentsCount: 3,
-    liked: false,
+    category: "serra",
+    likes: 12,
+    comments: 3,
+    isLiked: false,
     createdAt: new Date(Date.now() - 3600000),
   },
   {
@@ -144,9 +147,10 @@ const INITIAL_POSTS: Post[] = [
     authorRole: "Gerente",
     authorUnit: "Araripina",
     content: "Novo material de campanha disponível na pasta de Marketing. Confiram!",
-    likesCount: 8,
-    commentsCount: 1,
-    liked: false,
+    category: "araripina",
+    likes: 8,
+    comments: 1,
+    isLiked: false,
     createdAt: new Date(Date.now() - 7200000),
   },
 ];
@@ -209,7 +213,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addPost = (content: string, imageUrl?: string) => {
+  const addPost = (content: string, category: string = "geral") => {
     if (!user) return;
 
     const newPost: Post = {
@@ -218,11 +222,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       authorName: user.name,
       authorRole: user.appRole === "socio" ? "Sócio(a)" : user.appRole === "gerente" ? "Gerente" : "Consultora",
       authorUnit: user.unitNames?.[0] || "Grupo ONE",
+      authorAvatar: user.photoUrl,
       content,
-      imageUrl,
-      likesCount: 0,
-      commentsCount: 0,
-      liked: false,
+      category,
+      likes: 0,
+      comments: 0,
+      isLiked: false,
       createdAt: new Date(),
     };
 
@@ -236,8 +241,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       if (post.id === postId) {
         return {
           ...post,
-          liked: !post.liked,
-          likesCount: post.liked ? post.likesCount - 1 : post.likesCount + 1,
+          isLiked: !post.isLiked,
+          likes: post.isLiked ? post.likes - 1 : post.likes + 1,
         };
       }
       return post;
@@ -264,7 +269,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     const updatedPosts = posts.map((post) => {
       if (post.id === postId) {
-        return { ...post, commentsCount: post.commentsCount + 1 };
+        return { ...post, comments: post.comments + 1 };
       }
       return post;
     });
