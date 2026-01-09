@@ -5,7 +5,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAppAuth } from "@/lib/auth-context";
 import { useData, FileItem } from "@/lib/data-context";
 import { AppHeader } from "@/components/app-header";
-import { FooterLogos } from "@/components/footer-logos";
+// FooterLogos agora está fixo no _layout.tsx
 
 // Tipos de arquivos/pastas
 interface FileFolderItem {
@@ -278,8 +278,8 @@ export default function FilesScreen() {
           )}
         </View>
 
-        {/* Rodapé com logos */}
-        <FooterLogos />
+        {/* Espaço para o rodapé fixo */}
+        <View style={{ height: 50 }} />
       </ScrollView>
     </View>
   );

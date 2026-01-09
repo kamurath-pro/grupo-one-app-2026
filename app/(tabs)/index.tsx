@@ -7,7 +7,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAppAuth } from "@/lib/auth-context";
 import { useData } from "@/lib/data-context";
 import { AppHeader } from "@/components/app-header";
-import { FooterLogos } from "@/components/footer-logos";
+// FooterLogos agora está fixo no _layout.tsx
 import { ProfilePhoto } from "@/components/profile-photo";
 
 // Unidades (Times) para filtro
@@ -393,8 +393,8 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* Rodapé com 4 Logos */}
-        <FooterLogos />
+        {/* Espaço para o rodapé fixo */}
+        <View style={{ height: 50 }} />
       </ScrollView>
 
       {/* Modal de Comentário */}

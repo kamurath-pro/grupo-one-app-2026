@@ -77,3 +77,8 @@
 - [x] Garantir contraste correto (logo branca no fundo azul)
 - [x] Responsividade otimizada para todos os dispositivos
 - [ ] Tudo funcional em navegador e Play Store (em teste)
+
+## Correção v3.1 - Rodapé Fixo
+- [x] Barra azul com 4 logos fixa abaixo do tab bar (não scrollável)
+- [x] Rodapé estático igual ao exemplo visual
+- [x] Foto de perfil da Lia salva como exemplo

@@ -2,6 +2,7 @@ import { Tabs, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View, Text, Pressable, StyleSheet, Platform } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Image } from "expo-image";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { useAppAuth } from "@/lib/auth-context";
@@ -10,8 +11,10 @@ export default function TabLayout() {
   const { isAdmin, pendingUsers } = useAppAuth();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const bottomPadding = Platform.OS === "web" ? 12 : Math.max(insets.bottom, 8);
-  const tabBarHeight = 60 + bottomPadding;
+  const bottomPadding = Platform.OS === "web" ? 0 : Math.max(insets.bottom, 0);
+  const tabBarHeight = 60;
+  // Altura do rodapé com logos (40px) + safe area bottom
+  const footerHeight = 40 + bottomPadding;
 
   const pendingCount = pendingUsers.length;
 
@@ -25,7 +28,7 @@ export default function TabLayout() {
           tabBarButton: HapticTab,
           tabBarStyle: {
             paddingTop: 8,
-            paddingBottom: bottomPadding,
+            paddingBottom: 0,
             height: tabBarHeight,
             backgroundColor: "#FFFFFF",
             borderTopColor: "#E5E7EB",
@@ -35,6 +38,8 @@ export default function TabLayout() {
             shadowOpacity: 0.05,
             shadowRadius: 4,
             elevation: 8,
+            // Adiciona margem para o rodapé fixo
+            marginBottom: footerHeight,
           },
           tabBarLabelStyle: {
             fontSize: 11,
@@ -121,6 +126,32 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
+
+      {/* Rodapé fixo com as 4 logos */}
+      <View style={[styles.footerContainer, { paddingBottom: bottomPadding }]}>
+        <View style={styles.logosRow}>
+          <Image
+            source={require("@/assets/images/logos/grupoone-branca.png")}
+            style={styles.logo}
+            contentFit="contain"
+          />
+          <Image
+            source={require("@/assets/images/logos/espacolaser-branca.png")}
+            style={styles.logoWide}
+            contentFit="contain"
+          />
+          <Image
+            source={require("@/assets/images/logos/meta-branca.png")}
+            style={styles.logo}
+            contentFit="contain"
+          />
+          <Image
+            source={require("@/assets/images/logos/trafegon-branca.png")}
+            style={styles.logo}
+            contentFit="contain"
+          />
+        </View>
+      </View>
     </View>
   );
 }
@@ -165,5 +196,27 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 11,
     fontWeight: "bold",
+  },
+  footerContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#003FC3",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  logosRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  logo: {
+    width: 50,
+    height: 20,
+  },
+  logoWide: {
+    width: 80,
+    height: 20,
   },
 });
