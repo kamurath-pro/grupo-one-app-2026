@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, ScrollView } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, ScrollView, useWindowDimensions } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAppAuth } from "@/lib/auth-context";
@@ -294,6 +294,11 @@ export default function RecognitionScreen() {
   const { recognitions, sendRecognition } = useData();
   const [showNewRecognition, setShowNewRecognition] = useState(false);
 
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const isDesktop = width >= 1024;
+  const contentMaxWidth = isDesktop ? 800 : isTablet ? 600 : undefined;
+
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.replace("/login");
@@ -314,6 +319,7 @@ export default function RecognitionScreen() {
 
   return (
     <ScreenContainer>
+      <View style={{ maxWidth: contentMaxWidth, alignSelf: contentMaxWidth ? 'center' : undefined, width: '100%', flex: 1 }}>
       {/* Header */}
       <View className="px-4 py-3 border-b" style={{ borderColor: colors.border }}>
         <Text className="text-2xl font-bold text-foreground">Reconhecimento</Text>
@@ -348,6 +354,7 @@ export default function RecognitionScreen() {
       >
         <IconSymbol name="star.fill" size={28} color="#FFFFFF" />
       </TouchableOpacity>
+      </View>
 
       <NewRecognitionModal
         visible={showNewRecognition}

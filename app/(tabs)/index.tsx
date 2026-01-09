@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, RefreshControl } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, RefreshControl, useWindowDimensions } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAppAuth } from "@/lib/auth-context";
@@ -186,10 +186,15 @@ export default function HomeScreen() {
 
   const canPost = user?.appRole === "socio" || user?.appRole === "gerente";
 
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const isDesktop = width >= 1024;
+  const contentMaxWidth = isDesktop ? 800 : isTablet ? 600 : undefined;
+
   return (
     <ScreenContainer>
       {/* Header */}
-      <View className="px-4 py-3 flex-row items-center justify-between border-b" style={{ borderColor: colors.border }}>
+      <View className="px-4 py-3 flex-row items-center justify-between border-b" style={{ borderColor: colors.border, maxWidth: contentMaxWidth, alignSelf: contentMaxWidth ? 'center' : undefined, width: '100%' }}>
         <View>
           <Text className="text-2xl font-bold text-foreground">Feed</Text>
           <Text className="text-sm text-muted">Olá, {user?.name}</Text>
@@ -207,11 +212,13 @@ export default function HomeScreen() {
         data={posts}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <PostCard
-            post={item}
-            onLike={() => likePost(item.id)}
-            onComment={() => {}}
-          />
+          <View style={{ maxWidth: contentMaxWidth, alignSelf: contentMaxWidth ? 'center' : undefined, width: '100%' }}>
+            <PostCard
+              post={item}
+              onLike={() => likePost(item.id)}
+              onComment={() => {}}
+            />
+          </View>
         )}
         contentContainerStyle={{ paddingTop: 16, paddingBottom: 100 }}
         refreshControl={

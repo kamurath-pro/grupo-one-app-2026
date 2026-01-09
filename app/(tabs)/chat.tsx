@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, TextInput, Modal, KeyboardAvoidingView, Platform, useWindowDimensions } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAppAuth } from "@/lib/auth-context";
@@ -291,6 +291,11 @@ export default function ChatScreen() {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [showNewChat, setShowNewChat] = useState(false);
 
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const isDesktop = width >= 1024;
+  const contentMaxWidth = isDesktop ? 800 : isTablet ? 600 : undefined;
+
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.replace("/login");
@@ -319,6 +324,7 @@ export default function ChatScreen() {
 
   return (
     <ScreenContainer>
+      <View style={{ maxWidth: contentMaxWidth, alignSelf: contentMaxWidth ? 'center' : undefined, width: '100%', flex: 1 }}>
       {/* Header */}
       <View className="px-4 py-3 border-b" style={{ borderColor: colors.border }}>
         <Text className="text-2xl font-bold text-foreground">Chat</Text>
@@ -354,6 +360,7 @@ export default function ChatScreen() {
       >
         <IconSymbol name="plus" size={28} color="#FFFFFF" />
       </TouchableOpacity>
+      </View>
 
       <ChatModal
         visible={!!selectedConversation}

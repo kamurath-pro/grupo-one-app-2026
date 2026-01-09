@@ -32,3 +32,8 @@
 - [x] Aplicar logo da TráfegON no rodapé
 - [x] Implementar upload e exibição de foto de perfil
 - [x] Implementar funcionalidade de remover usuários (demissão)
+- [x] Otimizar layout responsivo para tablets
+- [x] Otimizar layout responsivo para desktop/computador
+- [x] Garantir acesso via navegador web em smartphones
+- [x] Testar responsividade em diferentes tamanhos de tela
+- [ ] Preparar aplicativo para publicação na Play Store (Android)

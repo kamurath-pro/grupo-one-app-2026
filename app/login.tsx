@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Modal, Image } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Modal, Image, useWindowDimensions } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAppAuth, UNITS } from "@/lib/auth-context";
@@ -556,7 +556,7 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className="flex-1 justify-center px-6 py-8">
+          <View className="flex-1 justify-center px-6 py-8" style={{ maxWidth: 480, alignSelf: 'center', width: '100%' }}>
             {/* Logo Area - Grupo ONE logo */}
             <View className="items-center mb-8">
               <Image

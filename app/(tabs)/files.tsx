@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, RefreshControl } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, RefreshControl, useWindowDimensions } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAppAuth } from "@/lib/auth-context";
@@ -74,6 +74,11 @@ export default function FilesScreen() {
   const currentFolderId = currentPath[currentPath.length - 1].id;
   const files = getFilesForUser(currentFolderId);
 
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const isDesktop = width >= 1024;
+  const contentMaxWidth = isDesktop ? 900 : isTablet ? 700 : undefined;
+
   const navigateToFolder = (folder: FileItem) => {
     setCurrentPath([...currentPath, { id: folder.id, name: folder.name }]);
   };
@@ -116,6 +121,7 @@ export default function FilesScreen() {
 
   return (
     <ScreenContainer>
+      <View style={{ maxWidth: contentMaxWidth, alignSelf: contentMaxWidth ? 'center' : undefined, width: '100%', flex: 1 }}>
       {/* Header */}
       <View className="px-4 py-3 border-b" style={{ borderColor: colors.border }}>
         <Text className="text-2xl font-bold text-foreground">Arquivos</Text>
@@ -193,6 +199,7 @@ export default function FilesScreen() {
           </Text>
         </View>
       )}
+      </View>
     </ScreenContainer>
   );
 }

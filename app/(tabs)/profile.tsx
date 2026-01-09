@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Alert, Image } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Alert, Image, useWindowDimensions } from "react-native";
 import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useAppAuth } from "@/lib/auth-context";
@@ -208,9 +208,15 @@ export default function ProfileScreen() {
     return null;
   }
 
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+  const isDesktop = width >= 1024;
+  const contentMaxWidth = isDesktop ? 600 : isTablet ? 500 : undefined;
+
   return (
     <ScreenContainer>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ alignItems: contentMaxWidth ? 'center' : undefined }}>
+        <View style={{ maxWidth: contentMaxWidth, width: '100%' }}>
         {/* Header */}
         <View className="items-center py-8 px-4">
           <TouchableOpacity onPress={handleChangePhoto} activeOpacity={0.8}>
@@ -323,6 +329,7 @@ export default function ProfileScreen() {
         <View className="items-center pb-8">
           <Text className="text-sm text-muted">Grupo ONE v1.0.0</Text>
           <Text className="text-xs text-muted mt-1">Desenvolvido por TráfegON</Text>
+        </View>
         </View>
       </ScrollView>
     </ScreenContainer>
