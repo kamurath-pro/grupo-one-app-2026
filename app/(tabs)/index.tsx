@@ -10,6 +10,7 @@ import { useNotifications } from "@/lib/notification-context";
 import { AppHeader } from "@/components/app-header";
 // FooterLogos agora está fixo no _layout.tsx
 import { ProfilePhoto } from "@/components/profile-photo";
+import { ComunicadoCarousel } from "@/components/comunicado-carousel";
 
 // Unidades (Times) para filtro
 const UNIDADES = [
@@ -172,20 +173,10 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          {/* Comunicado / Banner */}
+          {/* Comunicado / Carrossel */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Comunicado</Text>
-            <Pressable style={styles.banner}>
-              <View style={styles.bannerContent}>
-                <Text style={styles.bannerTag}>Novidade</Text>
-                <Text style={styles.bannerTitle}>
-                  Bem-vindo ao App Grupo ONE!
-                </Text>
-                <Text style={styles.bannerDescription}>
-                  Conectando colaboradores e sócios das unidades Espaçolaser.
-                </Text>
-              </View>
-            </Pressable>
+            <ComunicadoCarousel />
           </View>
 
           {/* Portal - Grid de Cards */}

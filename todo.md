@@ -202,3 +202,46 @@
 - [x] Identificar automaticamente aniversariantes do mês
 - [x] Identificar automaticamente aniversariante do dia
 - [x] Testar com múltiplos usuários cadastrados (10 testes passando)
+
+
+## Atualização v5.0 - Sistema de Comunicados Customizáveis
+### Estrutura de Dados
+- [x] Criar contexto CommunicadosContext para gerenciar comunicados
+- [x] Definir tipo Comunicado (id, titulo, conteudo, tipo, link, unidades, ordem)
+- [x] Implementar persistência em AsyncStorage (comunicados_[unitId])
+- [x] Criar serviço para validação de URLs de Google Drive
+
+### Painel de Administração
+- [x] Criar tela AdminComunicados com lista de comunicados
+- [x] Implementar formulário para criar novo comunicado (texto ou imagem)
+- [x] Adicionar seletor de unidades (checkboxes com opção TODAS)
+- [x] Implementar campo de link opcional com validação
+- [x] Criar interface para reordenação (botões ↑ ↓)
+- [x] Implementar botões de editar e remover comunicado
+- [x] Adicionar preview de comunicado antes de salvar
+- [x] Validar dimensões recomendadas (1080x600px, PNG, máx 500KB)
+
+### Carrossel de Comunicados na Home
+- [x] Criar componente ComunicadoCarousel (swipe horizontal)
+- [x] Implementar indicadores de página (pontos)
+- [x] Adicionar funcionalidade de clique no comunicado (abrir link)
+- [x] Garantir que comunicados sejam filtrados por unidade do usuário
+- [x] Implementar fallback para comunicado padrão se nenhum existir
+- [x] Otimizar performance para carrossel com até 13 comunicados
+
+### Testes
+- [x] Testar criação de comunicado com texto
+- [x] Testar criação de comunicado com link do Google Drive
+- [x] Testar seleção de unidades (TODAS, uma ou múltiplas)
+- [x] Testar reordenação de comunicados
+- [x] Testar remoção de comunicado
+- [x] Testar visualização no carrossel (swipe, indicadores)
+- [x] Testar abertura de link ao tocar no comunicado
+- [x] Testar persistência em AsyncStorage
+
+### Pronto para Publicação
+- [ ] Remover dados de teste
+- [ ] Validar responsividade em smartphone, tablet, desktop
+- [ ] Testar em dispositivo real (iOS e Android)
+- [ ] Verificar performance do carrossel
+- [ ] Confirmar que não há console errors

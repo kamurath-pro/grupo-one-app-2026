@@ -36,6 +36,7 @@ import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-run
 import { AuthProvider } from "@/lib/auth-context";
 import { DataProvider } from "@/lib/data-context";
 import { NotificationProvider } from "@/lib/notification-context";
+import { ComunicadosProvider } from "@/lib/comunicados-context";
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
@@ -123,17 +124,19 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <NotificationProvider>
-            <DataProvider>
-              {/* Default to hiding native headers so raw route segments don't appear (e.g. "(tabs)", "products/[id]"). */}
-              {/* If a screen needs the native header, explicitly enable it and set a human title via Stack.Screen options. */}
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="oauth/callback" />
-                <Stack.Screen name="login" options={{ presentation: "modal" }} />
-                <Stack.Screen name="notifications" options={{ presentation: "modal" }} />
-              </Stack>
-              <StatusBar style="auto" />
-            </DataProvider>
+              <ComunicadosProvider>
+                <DataProvider>
+                  {/* Default to hiding native headers so raw route segments don't appear (e.g. "(tabs)", "products/[id]"). */}
+                  {/* If a screen needs the native header, explicitly enable it and set a human title via Stack.Screen options. */}
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Screen name="oauth/callback" />
+                    <Stack.Screen name="login" options={{ presentation: "modal" }} />
+                    <Stack.Screen name="notifications" options={{ presentation: "modal" }} />
+                  </Stack>
+                  <StatusBar style="auto" />
+                </DataProvider>
+              </ComunicadosProvider>
             </NotificationProvider>
           </AuthProvider>
         </QueryClientProvider>

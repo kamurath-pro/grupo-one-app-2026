@@ -131,6 +131,14 @@ export default function TabLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="admin-comunicados"
+          options={{
+            href: isAdmin ? undefined : null,
+            title: "Comunicados",
+            tabBarIcon: ({ color }) => <MaterialIcons name="notifications-active" size={26} color={color} />,
+          }}
+        />
       </Tabs>
 
       {/* Rodapé fixo com as 4 logos */}
