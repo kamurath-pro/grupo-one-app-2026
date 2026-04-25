@@ -245,3 +245,31 @@
 - [ ] Testar em dispositivo real (iOS e Android)
 - [ ] Verificar performance do carrossel
 - [ ] Confirmar que não há console errors
+
+
+## Atualização v5.1 - Melhorias em Perfil e Identificação de Usuário
+
+### Aba Perfil
+- [x] Implementar função "Sair do Aplicativo" (logout)
+- [x] Ativar botão "Editar Perfil" com navegação para tela de edição
+- [x] Implementar função de editar/adicionar foto de perfil
+- [x] Exibir postagens do usuário no início da aba Perfil
+- [x] Mostrar reações (curtidas e comentários) nas postagens
+- [x] Posicionar "Configurações" | "Editar Perfil" no final da página
+
+### Identificação de Usuário
+- [x] Atualizar exibição em Home: Primeiro Nome (negrito) + Cargo - Unidade (menor)
+- [x] Atualizar exibição em Perfil: Primeiro Nome (negrito) + Cargo - Unidade (menor)
+- [x] Atualizar em qualquer outro local onde nome aparece
+
+### Aniversariantes do Mês
+- [x] Remover usuários deletados da lista de aniversariantes
+- [x] Manter publicações do usuário deletado visíveis
+- [x] Permitir admin deletar publicações manualmente
+
+### Testes
+- [x] Testar logout e retorno para login
+- [x] Testar edição de perfil
+- [x] Testar upload de foto de perfil
+- [x] Testar exibição correta de postagens no perfil
+- [x] Testar remoção de usuário em aniversariantes

@@ -437,6 +437,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     // Dados de aniversários extraídos do banco de dados de usuários registrados
     // Cada usuário tem um campo birthDate no cadastro
     // O sistema identifica automaticamente quem faz aniversário este mês
+    // Usuários deletados são automaticamente removidos da lista
     const birthdayData = [
       // Janeiro
       { userId: 1, name: "Natália", unitName: "Araripina", day: 9, month: 0, photoUrl: null },
@@ -474,6 +475,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     return birthdayData
       .filter((b) => b.month === currentMonth)
+      .filter((b) => ALL_USERS.some((u) => u.id === b.userId))
       .sort((a, b) => a.day - b.day)
       .map((b, index) => ({
         id: index + 1,

@@ -6,10 +6,12 @@ import { useAppAuth } from "@/lib/auth-context";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { AppHeader } from "@/components/app-header";
 import { useNotifications } from "@/lib/notification-context";
+import { useData } from "@/lib/data-context";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const PROFILE_PHOTO_KEY = "grupo_one_profile_photo";
 
@@ -18,7 +20,10 @@ export default function ProfileScreen() {
   const { width } = useWindowDimensions();
   const { user, isAuthenticated, loading: authLoading, logout } = useAppAuth();
   const { unreadCount } = useNotifications();
+  const { posts } = useData();
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  
+  const userPosts = user ? posts.filter((p) => p.authorId === user.id) : [];
 
   const isLargeScreen = width >= 768;
 
@@ -250,6 +255,28 @@ export default function ProfileScreen() {
             )}
           </View>
 
+          {/* Seção de Postagens */}
+          {userPosts.length > 0 && (
+            <View className="mx-4 mt-6">
+              <Text className="text-sm font-medium text-gray-500 mb-3 px-2">MINHAS POSTAGENS</Text>
+              {userPosts.map((post) => (
+                <View key={post.id} className="bg-white rounded-lg p-4 mb-3 border border-gray-100">
+                  <Text className="text-sm text-gray-900 mb-2">{post.content}</Text>
+                  <View className="flex-row items-center gap-4 mt-3">
+                    <View className="flex-row items-center">
+                      <MaterialIcons name="favorite-outline" size={16} color="#EF4444" />
+                      <Text className="text-xs text-gray-500 ml-1">{post.likes}</Text>
+                    </View>
+                    <View className="flex-row items-center">
+                      <MaterialIcons name="chat-bubble-outline" size={16} color="#003FC3" />
+                      <Text className="text-xs text-gray-500 ml-1">{post.comments}</Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+
           {/* Seção de Opções */}
           <View className="mx-4 mt-6">
             <Text className="text-sm font-medium text-gray-500 mb-3 px-2">CONFIGURAÇÕES</Text>
@@ -259,6 +286,7 @@ export default function ProfileScreen() {
               <TouchableOpacity
                 className="flex-row items-center p-4"
                 activeOpacity={0.7}
+                onPress={() => router.push("/(tabs)/edit-profile" as any)}
               >
                 <View className="w-10 h-10 rounded-lg items-center justify-center" style={{ backgroundColor: "#E6F0FF" }}>
                   <IconSymbol name="person.fill" size={20} color="#003FC3" />

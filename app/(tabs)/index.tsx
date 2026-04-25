@@ -165,10 +165,13 @@ export default function HomeScreen() {
             />
             <View style={styles.greetingText}>
               <Text style={styles.greetingName}>
-                Olá, {user?.name?.split(" ")[0] || "Usuário"}!
+                Olá, <Text style={{ fontWeight: "bold" }}>{user?.name?.split(" ")[0] || "Usuário"}</Text>!
               </Text>
               <Text style={styles.greetingUnit}>
-                {user?.unitNames?.join(", ") || "Grupo ONE"}
+                {user?.appRole === "socio" ? "Sócio(a)" : 
+                 user?.appRole === "gerente" ? "Gerente" :
+                 user?.appRole === "consultora" ? "Consultora" :
+                 user?.appRole === "admin" ? "Administrador" : user?.appRole} • {user?.unitNames?.join(", ") || "Grupo ONE"}
               </Text>
             </View>
           </View>
