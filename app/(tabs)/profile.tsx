@@ -240,6 +240,14 @@ export default function ProfileScreen() {
               <IconSymbol name="envelope.fill" size={16} color="#6B7280" />
               <Text className="text-sm text-gray-500 ml-2">{user.email}</Text>
             </View>
+
+            {/* Data de Nascimento */}
+            {user.birthDate && (
+              <View className="flex-row items-center mt-2">
+                <IconSymbol name="calendar" size={16} color="#6B7280" />
+                <Text className="text-sm text-gray-500 ml-2">{user.birthDate}</Text>
+              </View>
+            )}
           </View>
 
           {/* Seção de Opções */}

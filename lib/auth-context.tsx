@@ -13,6 +13,7 @@ export interface AppUser {
   unitNames: string[];
   avatarUrl?: string;
   photoUrl?: string;
+  birthDate?: string; // Data de nascimento (YYYY-MM-DD)
   approvalStatus: ApprovalStatus;
   registeredAt?: Date;
   saudacao?: string;
@@ -66,6 +67,7 @@ interface AuthContextType {
 interface RegisterData {
   name: string;
   email: string;
+  birthDate: string;
   password: string;
   unitId: number;
   appRole: "gerente" | "consultora";
@@ -94,6 +96,8 @@ export const UNITS: Unit[] = [
   { id: 10, name: "Fortaleza", city: "Fortaleza", state: "CE" },
   { id: 11, name: "Macaé Shopping", city: "Macaé", state: "RJ" },
   { id: 12, name: "Macaé Centro", city: "Macaé", state: "RJ" },
+  { id: 13, name: "Quixadá", city: "Quixadá", state: "CE" },
+  { id: 14, name: "Messejana", city: "Fortaleza", state: "CE" },
 ];
 
 // Configuração de acesso por unidade (links do Drive)

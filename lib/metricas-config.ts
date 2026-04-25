@@ -22,6 +22,18 @@ export const UNIDADES_METRICAS: UnidadeMetricas[] = [
     sheetId: "1bZYM4-Iw-7TWMtNcgX1apj5jrSpR1pBPXKAVxciSOWo",
     sheetUrl: "https://docs.google.com/spreadsheets/d/1bZYM4-Iw-7TWMtNcgX1apj5jrSpR1pBPXKAVxciSOWo/edit?usp=sharing",
   },
+  {
+    id: "quixada",
+    nome: "Quixadá",
+    sheetId: "", // Aguardando link da planilha
+    sheetUrl: "",
+  },
+  {
+    id: "messejana",
+    nome: "Messejana",
+    sheetId: "", // Aguardando link da planilha
+    sheetUrl: "",
+  },
   // Outras unidades serão adicionadas conforme os links forem fornecidos
   // Serra Talhada, Garanhuns, Cajazeiras, Livramento, Muriaé, Vilhena, Corumbá, Fortaleza, Macaé Plaza, Macaé Centro
 ];

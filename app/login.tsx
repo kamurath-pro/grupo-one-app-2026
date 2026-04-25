@@ -73,6 +73,7 @@ export default function LoginScreen() {
   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [selectedUnitId, setSelectedUnitId] = useState(1);
   const [selectedRole, setSelectedRole] = useState<"consultora" | "gerente">("consultora");
@@ -88,6 +89,7 @@ export default function LoginScreen() {
     setPassword("");
     setName("");
     setEmail("");
+    setBirthDate("");
     setConfirmPassword("");
     setError("");
   };
@@ -113,7 +115,7 @@ export default function LoginScreen() {
   };
 
   const handleRegister = async () => {
-    if (!name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+    if (!name.trim() || !email.trim() || !birthDate.trim() || !password.trim() || !confirmPassword.trim()) {
       setError("Preencha todos os campos");
       return;
     }
@@ -134,6 +136,7 @@ export default function LoginScreen() {
     const result = await register({
       name: name.trim(),
       email: email.trim(),
+      birthDate: birthDate.trim(),
       password,
       unitId: selectedUnitId,
       appRole: selectedRole,
@@ -371,6 +374,22 @@ export default function LoginScreen() {
                         onChangeText={setEmail}
                         keyboardType="email-address"
                         autoCapitalize="none"
+                        returnKeyType="next"
+                      />
+                    </View>
+
+                    {/* Data de Nascimento */}
+                    <Text className="text-sm font-medium text-gray-600 mb-2">Data de Nascimento</Text>
+                    <View className="flex-row items-center rounded-xl px-4 border border-gray-200 bg-gray-50 mb-4">
+                      <IconSymbol name="calendar" size={20} color="#6B7280" />
+                      <TextInput
+                        className="flex-1 py-4 px-3 text-base text-gray-900"
+                        placeholder="DD/MM/YYYY"
+                        placeholderTextColor="#9CA3AF"
+                        value={birthDate}
+                        onChangeText={setBirthDate}
+                        keyboardType="number-pad"
+                        maxLength={10}
                         returnKeyType="next"
                       />
                     </View>

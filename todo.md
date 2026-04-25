@@ -192,3 +192,13 @@
 - [x] Identificar unidades pelos prefixos (ARA, ST, GUS, CZ, VSA, LIV, MUR, VIL, COR, FOR, MACS, MACE)
 - [x] Serviço monday-service.ts criado com mapeamento completo
 - [ ] Atualização automática diária (requer endpoint no servidor)
+
+## ## Atualização v4.5 - Novas Unidades e Aniversários do Perfil
+- [x] Adicionar Quixadá (QUI) ao mapeamento de unidades
+- [x] Adicionar Messejana (MES) ao mapeamento de unidades
+- [x] Adicionar campo "Data de Nascimento" no cadastro de usuários
+- [x] Adicionar campo "Data de Nascimento" no perfil do usuário (editável)
+- [x] Atualizar sistema de aniversariantes para extrair do banco de dados
+- [x] Identificar automaticamente aniversariantes do mês
+- [x] Identificar automaticamente aniversariante do dia
+- [x] Testar com múltiplos usuários cadastrados (10 testes passando)

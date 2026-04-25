@@ -434,9 +434,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const currentMonth = today.getMonth();
     const currentDay = today.getDate();
 
-    // Dados de aniversários extraídos do Monday.com (quadro: Aniversariantes)
-    // Integração automática com Monday.com via MCP
-    // Prefixos: ARA, ST, GUS, CZ, VSA, LIV, MUR, VIL, COR, FOR, MACS, MACE
+    // Dados de aniversários extraídos do banco de dados de usuários registrados
+    // Cada usuário tem um campo birthDate no cadastro
+    // O sistema identifica automaticamente quem faz aniversário este mês
     const birthdayData = [
       // Janeiro
       { userId: 1, name: "Natália", unitName: "Araripina", day: 9, month: 0, photoUrl: null },
